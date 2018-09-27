@@ -1,51 +1,192 @@
 Country,Continent
-Basque Country,Europe
-Chile,South America
-China,Asia
-Colombia,South America
-Costa Rica,North America
-Cyprus,Europe
-Czech Republic,Europe
-Dominican Republic,North America
-Ecuador,South America
-Estonia,Europe
-Georgia,Asia
-Germany,Europe
 Ghana,Africa
+Libya,Africa
+Morocco,Africa
+Nigeria,Africa
+Rwanda,Africa
+South Africa,Africa
+Zimbabwe,Africa
+Azerbaijan,Asia
+Bahrain,Asia
+Armenia,Asia
+China,Asia
+Taiwan,Asia
+Georgia,Asia
 Hong Kong,Asia
 India,Asia
 Japan,Asia
-Jordan,Asia
 Kazakhstan,Asia
+Jordan,Asia
+South Korea,Asia
 Kuwait,Asia
 Kyrgyzstan,Asia
-Libya,Africa
 Malaysia,Asia
-Mexico,North America
-Morocco,Africa
-Netherlands,Europe
-Nigeria,Africa
 Pakistan,Asia
-Peru,South America
 Philippines,Asia
-Poland,Europe
 Qatar,Asia
-Romania,Europe
-Russia,Europe
-Rwanda,Africa
 Singapore,Asia
-Slovenia,Europe
-South Africa,Africa
-South Korea,Asia
-Spain,Europe
-Sweden,Europe
-Taiwan,Asia
 Thailand,Asia
-Trinidad,South America
 Turkey,Asia
-Ukraine,Europe
-United States,North America
-Uruguay,South America
 Uzbekistan,Asia
 Yemen,Asia
-Zimbabwe,Africa
+Belarus,Europe
+Cyprus (G),Europe
+Estonia,Europe
+Germany,Europe
+Netherlands,Europe
+Poland,Europe
+Romania,Europe
+Russia,Europe
+Slovenia,Europe
+Spain,Europe
+Sweden,Europe
+Ukraine,Europe
+Mexico,North America
+Trinidad and Tobago,South America
+United States,North America
+Australia,Oceania
+Argentina,South America
+Brazil,South America
+Chile,South America
+Colombia,South America
+Ecuador,South America
+Peru,South America
+Uruguay,South America
+Albania,Europe
+Algeria,Africa
+American Samoa,Oceania
+Andorra,Europe
+Angola,Africa
+Antigua,North America
+Austria,Europe
+Bangladesh,Asia
+Barbados,North America
+Belgium,Europe
+Bermuda,North America
+Bhutan,Asia
+Bolivia,South America
+Bosnia,Europe
+Botswana,Africa
+Belize,North America
+Bulgaria,Europe
+Myanmar,Asia
+Burundi,Africa
+Cambodia,Asia
+Cameroon,Africa
+Canada,North America
+Sri Lanka,Asia
+Chad,Africa
+D.R. Congo,Africa
+Cook Islands,Oceania
+Costa Rica,North America
+Croatia,Europe
+Cuba,North America
+Cyprus (T),Europe
+Czech Rep.,Europe
+Denmark,Europe
+Dominican Rep.,North America
+El Salvador,North America
+Eq.Guinea,Africa
+Ethiopia,Africa
+Eritrea,Africa
+Finland,Europe
+France,Europe
+Gambia,Africa
+Palestine,Asia
+Gibraltar,Europe
+Greece,Europe
+Guatemala,North America
+Guinea,Africa
+Guyana,South America
+Haiti,North America
+Honduras,North America
+Hungary,Europe
+Iceland,Europe
+Indonesia,Asia
+Iran,Asia
+Iraq,Asia
+Ireland,Europe
+Israel,Asia
+Italy,Europe
+Côte d'Ivoire,Africa
+Jamaica,North America
+Kenya,Africa
+North Korea,Asia
+Laos,Asia
+Lebanon,Asia
+Lesotho,Africa
+Latvia,Europe
+Liberia,Africa
+Liechtenstein,Europe
+Lithuania,Europe
+Luxembourg,Europe
+Madagascar,Africa
+Malawi,Africa
+Mali,Africa
+Malta,Europe
+Martinique,North America
+Mauritania,Africa
+Mauritius,Africa
+Monaco,Europe
+Mongolia,Asia
+Moldova,Europe
+Mozambique,Africa
+Oman,Asia
+Namibia,Africa
+Nepal,Asia
+New Zealand,Oceania
+Nicaragua,North America
+Niger,Africa
+Norway,Europe
+Panama,North America
+Papua New Guinea,Asia
+Paraguay,South America
+Portugal,Europe
+Guinea-Bissau,Africa
+Timor-Leste,Asia
+Puerto Rico,North America
+Saudi Arabia,Asia
+Senegal,Africa
+Seychelles,Africa
+Sierra Leone,Africa
+Slovakia,Europe
+Viet Nam,Asia
+Somalia,Africa
+Sudan,Africa
+Suriname,South America
+Switzerland,Europe
+Syria,Asia
+Tajikistan,Asia
+Togo,Africa
+United Arab Emirates,Asia
+Tunisia,Africa
+Turkmenistan,Asia
+Uganda,Africa
+Macedonia,Europe
+Egypt,Africa
+Great Britain,Europe
+Tanzania,Africa
+U.S. Virgin Islands,North America
+Burkina Faso,Africa
+Venezuela,South America
+Serbia and Montenegro,Europe
+Zambia,Africa
+West Germany,Europe
+East Germany,Europe
+Tambov,Europe
+Moscow,Europe
+Basque Country,Europe
+Andalusia,Europe
+Galicia,Europe
+North Ireland,Europe
+Valencia,Europe
+Serbia,Europe
+Montenegro,Europe
+Srpska Republic,Europe
+Bosnian Federation,Europe
+Kosovo,Europe
+Missing; Unknown,NA
+Not asked in survey,NA
+Not applicable,NA
+No answer,NA
+Don't know,NA
