@@ -68,3 +68,7 @@ lapply(country_list, function(x) {
   out <- tidy(model)
   kable(out)
 })
+
+full_model <- lm(rac_ideo ~ ec_ideo*country, data = WVS_OECD, weights = V258)
+
+summary(full_model)
