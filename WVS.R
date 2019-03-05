@@ -49,7 +49,7 @@ WVS <- WVS %>% mutate(ec_ideo = (((V96 + 8)/9) * ((abs(V97 - 11) + 8)/9) *
 wiki <- read_html("https://en.wikipedia.org/wiki/OECD")
 
 OECD <- wiki %>% 
-  html_nodes("table.wikitable:nth-child(70)") %>%
+  html_nodes("table.wikitable:nth-child(71)") %>%
   html_table(header = TRUE)
 OECD <- OECD[[1]]
 
