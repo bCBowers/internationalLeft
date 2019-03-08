@@ -7,6 +7,7 @@ library(rvest)
 library(plyr)
 library(broom)
 library(knitr)
+library(stargazer)
 
 # Import data
 
@@ -111,3 +112,8 @@ summary(multi_model)
 
 anova(full_model_edu, multi_model)
 anova(full_model_rel, multi_model)
+
+# Export model
+
+stargazer(multi_model, title = "Racial resentment as a function of economic ideology", style = "demography", 
+          notes = "Adjusted for educational attainment and frequency of religious services attendance")
