@@ -53,7 +53,7 @@ sapply(country_list, function(x) {
 }) -> coeffs
 median(coeffs)
 
-W_EVS <- W_EVS %>% within(country <- relevel(country, ref = "New Zealand"))
+W_EVS <- W_EVS %>% within(country <- relevel(country, ref = "Great Britain"))
 
 ## Modeling
 
