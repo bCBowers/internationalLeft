@@ -2,8 +2,17 @@
 
 library(shiny)
 library(ggplot2)
+library(tidyverse)
+library(ggrepel)
+library(survey)
+library(rvest)
+library(plyr)
+library(broom)
+library(knitr)
+library(RCurl)
 
-W_EVS <- read.csv("WVS_viz_vars.csv")
+url <- getURL("https://raw.githubusercontent.com/Jklein29/internationalLeft/master/WVS_viz_vars.csv")
+W_EVS <- read.csv(text = url)
 
 # Define UI
 
