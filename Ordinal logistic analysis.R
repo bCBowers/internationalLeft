@@ -42,6 +42,5 @@ lapply(country_list, function(x) {
   ctable <- coef(summary(models))
   p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
   ctable <- cbind(ctable, "p value" = p)
-  return(ctable)
+  stargazer(ctable)
 })
-

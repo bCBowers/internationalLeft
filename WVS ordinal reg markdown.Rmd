@@ -1,6 +1,8 @@
 ---
-title: "Ordinal logistic regression of level of racial resentment as a function of economic ideology"
-author: "Jordan Klein"
+title: Ordinal logistic regression of level of racial resentment as a function of
+  economic ideology
+author: Stratified by country, weighted, adjusted for educational attainment and relgious
+  service attendance
 date: "3/14/2019"
 output:
   pdf_document: default
@@ -20,29 +22,34 @@ library(plyr)
 library(broom)
 library(knitr)
 library(RCurl)
+library(stargazer)
 
 url <- getURL("https://raw.githubusercontent.com/Jklein29/internationalLeft/master/WVS_viz_vars.csv")
 W_EVS <- read.csv(text = url)
 
 # Create racial resentment factor variable
 
-W_EVS <- W_EVS %>% mutate(RacRes = case_when(rac_ideo == 0 ~ "Very low", 
-                                             rac_ideo > 0 & rac_ideo <= .25 ~ "Low", 
-                                             rac_ideo > .25 & rac_ideo <= .5 ~ "Moderate", 
-                                             rac_ideo > .5 & rac_ideo <= .75 ~ "High", 
-                                             rac_ideo > .75 ~ "Very high")) %>% 
-  mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
+W_EVS <- W_EVS %>% mutate(RacRes = case_when(rac_ideo == 0 ~ "Very low resentment", 
+                                             rac_ideo > 0 & rac_ideo <= .25 ~ "Low resentment", 
+                                             rac_ideo > .25 & rac_ideo <= .5 ~ "Moderate resentment", 
+                                             rac_ideo > .5 & rac_ideo <= .75 ~ "High resentment", 
+                                             rac_ideo > .75 ~ "Very high resentment")) %>% 
+  mutate(RacRes = factor(RacRes, levels = c("Very low resentment", "Low resentment", "Moderate resentment", "High resentment", "Very high resentment")))
 
 # Ordinal logistic regression
 
 library(MASS)
 
+W_EVS <- W_EVS %>% mutate(`Economic Ideology` = ec_ideo) %>% 
+  mutate(Education = edu) %>% 
+  mutate(Religion = relig)
+
 country_list <- W_EVS %>% dlply('country')
 ```
 
-```{r models, echo=FALSE, warning=FALSE, message=FALSE}
+```{r models, echo=FALSE, warning=FALSE, message=FALSE, results='asis'}
 lapply(country_list, function(x) {
-  models <- polr(RacRes ~ ec_ideo + edu + relig, data = x, weights = S017, Hess = T)
+  models <- polr(RacRes ~ `Economic Ideology` + Education + Religion, data = x, weights = S017, Hess = T)
   ctable <- coef(summary(models))
   p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
   ctable <- cbind(ctable, "p value" = p)
