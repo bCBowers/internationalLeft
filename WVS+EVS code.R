@@ -119,3 +119,9 @@ anova(full_model_rel, multi_model)
 
 stargazer(multi_model, title = "Racial resentment as a function of economic ideology", style = "demography", 
           notes = "Adjusted for educational attainment and frequency of religious services attendance")
+
+# Save smaller dataset for visualization
+
+WVS_small <- select(W_EVS, country, ec_ideo, rac_ideo, edu, relig, S017)
+
+write.csv(WVS_small, "WVS_viz_vars")
