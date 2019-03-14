@@ -32,3 +32,5 @@ server <- function(input, output) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
+runGitHub("internationalLeft", "Jklein29", subdir = "WVS_EVS_viz")
