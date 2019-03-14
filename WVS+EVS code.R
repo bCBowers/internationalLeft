@@ -43,7 +43,7 @@ W_EVS <- W_EVS %>% mutate(relig = F028)
 
 country_list <- W_EVS %>% dlply('country')
 
-# Create reference category
+# Find median coefficient
 
 sapply(country_list, function(x) {
   model <- lm(rac_ideo ~ ec_ideo, data = x, weights = S017)
@@ -53,7 +53,9 @@ sapply(country_list, function(x) {
 }) -> coeffs
 median(coeffs)
 
-W_EVS <- W_EVS %>% within(country <- relevel(country, ref = "Great Britain"))
+# Fix name of northern ireland
+
+levels(W_EVS$country)[levels(W_EVS$country) == "North Ireland"] <- "Northern Ireland"
 
 ## Modeling
 
