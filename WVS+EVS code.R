@@ -124,4 +124,4 @@ stargazer(multi_model, title = "Racial resentment as a function of economic ideo
 
 WVS_small <- select(W_EVS, country, ec_ideo, rac_ideo, edu, relig, S017)
 
-write.csv(WVS_small, "WVS_viz_vars")
+write.csv(WVS_small, "WVS_viz_vars.csv")
