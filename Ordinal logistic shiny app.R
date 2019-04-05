@@ -28,43 +28,49 @@ W_EVS <- W_EVS %>% mutate(RacRes = case_when(rac_ideo == 0 ~ "Very low",
                                              rac_ideo > .75 ~ "Very high")) %>% 
   mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
 
-W_EVS <- W_EVS %>% mutate(RacRes_n = case_when(RacRes == "Very low" ~ 0, 
-                                               RacRes == "Low" ~ .25, RacRes == "Moderate" ~ .5, 
-                                               RacRes == "High" ~ .75, RacRes == "Very high" ~ 1))
+# Create probability data
+
+country_list <- W_EVS %>% dlply('country')
+
+lapply(country_list, function(x) {
+  polr(RacRes ~ ec_ideo, data = x, weights = S017, Hess = T) %>% 
+    predict(x, type = "probs") %>% 
+    cbind(dplyr::select(x, country, ec_ideo), .) %>% 
+    reshape2::melt(id.vars = c("country", "ec_ideo"), 
+                   variable.name = "Resentment_level", value.name = "Probability")
+}) %>% 
+  do.call(rbind.data.frame, .) -> W_EVS_probs
 
 # Define UI
 
-ui <- fluidPage(
+ui_2 <- fluidPage(
   titlePanel("Economic Ideology and Racial Resentment"),
   sidebarLayout(position = "right", 
-    sidebarPanel(
-      selectInput("country", label = "Country", 
-                  choices = levels(W_EVS$country), selected = "United States")),
-    mainPanel(
-      plotOutput("scatterplot"))))
+                sidebarPanel(
+                  selectInput("country", label = "Country", 
+                              choices = levels(W_EVS_probs$country), selected = "United States")),
+                mainPanel(
+                  plotOutput("scatterplot"))))
 
 # Define server
 
-server <- function(input, output) {
+server_2 <- function(input, output) {
   
   filtered <- reactive({
-    filter(W_EVS, !is.na(RacRes_n) & !is.na(ec_ideo) & !is.na(edu) & !is.na(relig)) %>% 
-      filter(country == input$country)
+    W_EVS_probs %>% filter(country == input$country)
   })
   
   output$scatterplot <- renderPlot({
     filtered() %>% 
-      ggplot(aes(x = resid(lm(ec_ideo ~ edu + relig, weights = S017)), 
-                 y = resid(lm(RacRes_n ~ edu + relig, weights = S017)))) + 
-      geom_smooth(method = "glm", color = "darkblue") + 
-      labs(caption = "Partial multiple linear regression plots adjusted for education and religion") + 
-      scale_x_continuous("Economic Ideology (left to right)", breaks = c(-.4, -.2, 0, .2, .4)) + 
-      scale_y_continuous("Racial Resentment (low to high)", breaks = c(-.4, -.2, 0, .2, .4)) + 
+      ggplot(aes(x = ec_ideo, y = Probability, colour = Resentment_level)) + geom_line() + 
+      labs(caption = "Ordinal logistic regression plots") + 
+      scale_x_continuous("Economic Ideology (left to right)", breaks = c(0, .25, .5, .75, 1)) + 
+      scale_y_continuous("Probability", breaks = c(0, .25, .5, .75)) + 
       theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15)) + 
-      coord_cartesian(xlim = c(-.4, .4), ylim = c(-.4, .4))
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, .75))
     
   })
 }
 
 # Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui_2, server = server_2)
