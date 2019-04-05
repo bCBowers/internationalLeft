@@ -5,6 +5,6 @@ account: jklein29
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 788864
-bundleId: 1938474
+bundleId: 1988383
 url: https://jklein29.shinyapps.io/wvs_evs_viz/
-when: 1552536454.66216
+when: 1554443601.41375
