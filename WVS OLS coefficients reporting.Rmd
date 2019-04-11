@@ -10,8 +10,11 @@ output:
 
 *Higher coefficients indicate a stronger relationship between right-wing economic ideology and higher levels of racial resentment (and between left-wing economic ideology and lower levels of racial resentment)*
 
+<<<<<<< HEAD
 *Method: Multiple linear regression*
 
+=======
+>>>>>>> b4729e6ce0f727d5d044d82e62f10aa882ab219d
 ```{r code, include=FALSE}
 ### Import data
 
