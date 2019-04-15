@@ -101,6 +101,10 @@ W_EVS <- W_EVS %>% mutate(generation = case_when(X002 < 1928 ~ "Greatest",
                                                  X002 >= 1981 & X002 < 1997 ~ "Millennials", 
                                                  X002 >= 1997 ~ "Gen Z"))
 
+# Creation of country-wave variable
+
+W_EVS <- W_EVS %>% mutate(country_wave = paste(country, S020))
+
 # Export W_EVS clean
 
 write.csv(W_EVS, "W_EVS_clean.csv")
