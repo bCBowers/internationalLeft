@@ -54,11 +54,14 @@ server <- function(input, output) {
     filtered() %>% 
       ggplot(aes(x = rac_ideo, y = self_ideo, colour = generation)) + 
       geom_smooth(method = "glm", aes(weight = S017)) + 
-      labs(caption = "Linear regression plots stratified by generation", colour = "Generation") + 
+      labs(caption = "Linear regression plots stratified by generation", colour = "Generation (years born)") + 
       scale_x_continuous("Racial resentment (low to high)", breaks = c(0, .25, .5, .75, 1)) + 
       scale_y_continuous("Ideological self-placement (left to right)", breaks = c(1, 4, 7, 10)) + 
       theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15)) + 
-      coord_cartesian(xlim = c(0, 1), ylim = c(1, 10))
+      coord_cartesian(xlim = c(0, 1), ylim = c(1, 10)) + 
+      scale_color_discrete(breaks = c("Greatest", "Silent", "Boomers", "Gen X", "Millennials"), 
+                           labels = c("Greatest (pre-1928)", "Silent (1928-1945)", "Boomers (1946-1964)", 
+                                      "Gen X (1965-1980)", "Millennials (1981-1996)"))
     
   })
 }
