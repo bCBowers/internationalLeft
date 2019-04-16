@@ -16,7 +16,7 @@ library(reshape2)
 url <- getURL("https://raw.githubusercontent.com/jordan-klein/internationalLeft/master/W_EVS_clean.csv")
 W_EVS <- read.csv(text = url)
 
-filter(W_EVS, !is.na(self_ideo) & !is.na(ec_ideo) & !is.na(generation)) %>% 
+filter(W_EVS, !is.na(self_ideo) & !is.na(rac_ideo) & !is.na(generation)) %>% 
   mutate(country_wave = droplevels(country_wave)) -> W_EVS
 
 cw_list <- W_EVS %>% dlply('country_wave')
@@ -28,12 +28,12 @@ lapply(cw_list, function(x) {
   melt() -> gen_index
 
 left_join(W_EVS, gen_index, by = c("country_wave" = "Var1", "generation" = "Var2")) %>% 
-  filter(value == F) -> W_EVS
+filter(value == F) -> W_EVS
 
 # Define UI
 
 ui <- fluidPage(
-  titlePanel("Economic Ideology and Ideological Self-Placement"),
+  titlePanel("Racial Resentment and Ideological Self-Placement"),
   sidebarLayout(position = "right", 
                 sidebarPanel(
                   selectInput("country_wave", label = "Country & survey year", 
@@ -52,10 +52,10 @@ server <- function(input, output) {
   
   output$scatterplot <- renderPlot({
     filtered() %>% 
-      ggplot(aes(x = ec_ideo, y = self_ideo, colour = generation)) + 
+      ggplot(aes(x = rac_ideo, y = self_ideo, colour = generation)) + 
       geom_smooth(method = "glm", aes(weight = S017)) + 
       labs(caption = "Linear regression plots stratified by generation", colour = "Generation") + 
-      scale_x_continuous("Economic Ideology (left to right)", breaks = c(0, .25, .5, .75, 1)) + 
+      scale_x_continuous("Racial resentment (low to high)", breaks = c(0, .25, .5, .75, 1)) + 
       scale_y_continuous("Ideological self-placement (left to right)", breaks = c(1, 4, 7, 10)) + 
       theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15)) + 
       coord_cartesian(xlim = c(0, 1), ylim = c(1, 10))

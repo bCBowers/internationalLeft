@@ -5,8 +5,8 @@ account: jklein29
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 867404
-bundleId: 2014125
+bundleId: 2014389
 url: https://jklein29.shinyapps.io/s_ideo_econ/
-when: 1555375257.17198
+when: 1555387420.5113
 asMultiple: FALSE
 asStatic: FALSE
