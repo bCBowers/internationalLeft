@@ -16,7 +16,7 @@ library(reshape2)
 url <- getURL("https://raw.githubusercontent.com/jordan-klein/internationalLeft/master/W_EVS_clean.csv")
 W_EVS <- read.csv(text = url)
 
-filter(W_EVS, !is.na(self_ideo) & !is.na(rac_ideo) & !is.na(generation)) %>% 
+filter(W_EVS, !is.na(self_ideo) & !is.na(RacRes_n) & !is.na(generation)) %>% 
   mutate(country_wave = droplevels(country_wave)) -> W_EVS
 
 cw_list <- W_EVS %>% dlply('country_wave')
@@ -52,7 +52,7 @@ server <- function(input, output) {
   
   output$scatterplot <- renderPlot({
     filtered() %>% 
-      ggplot(aes(x = rac_ideo, y = self_ideo, colour = generation)) + 
+      ggplot(aes(x = RacRes_n, y = self_ideo, colour = generation)) + 
       geom_smooth(method = "glm", aes(weight = S017)) + 
       labs(caption = "Linear regression plots stratified by generation", colour = "Generation (years born)") + 
       scale_x_continuous("Racial resentment (low to high)", breaks = c(0, .25, .5, .75, 1)) + 

@@ -1,0 +1,55 @@
+---
+title: "Relationship between Age and Economic Ideology"
+author: "Jordan Klein"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+*A cross-national comparison*
+
+*Higher coefficients indicate a stronger relationship between older age and right-wing economic ideology (and between younger age and left-wing economic ideology)*
+
+*Method: Linear regression*
+
+```{r code, include=FALSE}
+### Import data
+
+library(shiny)
+library(ggplot2)
+library(tidyverse)
+library(ggrepel)
+library(survey)
+library(rvest)
+library(plyr)
+library(broom)
+library(knitr)
+library(RCurl)
+library(stargazer)
+
+W_EVS <- read.csv("W_EVS_clean.csv")
+
+# Split into list by country-wave
+
+cw_list <- W_EVS %>% dlply('country_wave')
+
+## Modeling
+
+lapply(cw_list, function(x) {
+  filter(x, !is.na(ec_ideo) & !is.na(X003))
+}) %>% 
+  .[sapply(., function(x) {
+    dim(x)[1] > 0
+  })] %>% 
+  lapply(function(x) {
+  model <- lm(ec_ideo ~ X003, data = x, weights = S017)
+  return(data.frame(Coefficients = model$coefficients[2]))
+}) %>% 
+  do.call(rbind.data.frame, .) -> coeff.tab
+
+OLS.tab <- coeff.tab[order(coeff.tab$Coefficients, decreasing = T), , drop = F]
+```
+
+```{r echo=FALSE, results='asis'}
+kable(OLS.tab)
+```
