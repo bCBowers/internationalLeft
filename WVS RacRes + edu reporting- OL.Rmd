@@ -1,5 +1,5 @@
 ---
-title: "Relationship between Age and Racial Resentment"
+title: "Relationship between Education and Racial Resentment"
 author: "Jordan Klein"
 output:
   pdf_document: default
@@ -8,7 +8,7 @@ output:
 
 *A cross-national comparison*
 
-*Higher coefficients indicate a stronger relationship between older age and higher levels of racial resentment (and between younger age and lower levels of racial resentment)*
+*Higher coefficients indicate a stronger relationship between higher levels of education and higher levels of racial resentment (and between lower levels of education and lower levels of racial resentment)*
 
 *Method: Ordinal logistic regression*
 
@@ -39,13 +39,13 @@ cw_list <- W_EVS %>% dlply('country_wave')
 ## Modeling
 
 lapply(cw_list, function(x) {
-  filter(x, !is.na(RacRes) & !is.na(X003))
+  filter(x, !is.na(RacRes) & !is.na(edu))
 }) %>% 
   .[sapply(., function(x) {
     dim(x)[1] > 0
   })] %>% 
   lapply(function(x) {
-  model <- polr(RacRes ~ X003, data = x, weights = S017, Hess = T)
+  model <- polr(RacRes ~ edu, data = x, weights = S017, Hess = T)
   return(data.frame(Coefficients = model$coefficients[1]))
 }) %>% 
   do.call(rbind.data.frame, .) -> coeff.tab
