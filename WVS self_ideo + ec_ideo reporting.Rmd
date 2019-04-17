@@ -1,5 +1,5 @@
 ---
-title: "Relationship between Economic Ideology and Self Left-Right Ideological Placement"
+title: "Relationship between Economic Ideology and Left-Right Ideological Self-Placement"
 author: "Jordan Klein"
 output:
   pdf_document: default
@@ -8,7 +8,7 @@ output:
 
 *A cross-national comparison*
 
-*Higher coefficients indicate a stronger relationship between left-right economic ideology and self left-right ideological placement*
+*Higher coefficients indicate a stronger relationship between left-right economic ideology and left-right ideological self-placement*
 
 *Method: Linear regression*
 
