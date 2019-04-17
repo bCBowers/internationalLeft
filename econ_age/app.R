@@ -27,7 +27,7 @@ ui <- navbarPage("Model selection",
                           titlePanel("Age and Economic Ideology"), 
                           sidebarLayout(position = "right", 
                                         sidebarPanel(
-                                          selectInput("country", label = "Country", 
+                                          selectInput("country1", label = "Country", 
                                                       choices = levels(W_EVS$country), 
                                                       selected = "United States")), 
                                         mainPanel(plotOutput("n_edu_plot")))), 
@@ -35,22 +35,22 @@ ui <- navbarPage("Model selection",
                           titlePanel("Age and Economic Ideology"),
                           sidebarLayout(position = "right", 
                                         sidebarPanel(
-                                          selectInput("country", label = "Country", 
+                                          selectInput("country2", label = "Country", 
                                                       choices = levels(W_EVS$country), 
                                                       selected = "United States")), 
                                         mainPanel(plotOutput("edu_plot")))))
 
 # Define server
 
-server <- function(input, output, session) {
+server <- function(input, output) {
   
-  filtered <- reactive({
+  filter1 <- reactive({
     filter(W_EVS) %>% 
-      filter(country == input$country)
+      filter(country == input$country1)
   })
   
   output$n_edu_plot <- renderPlot({
-    filtered() %>% 
+    filter1() %>% 
       ggplot(aes(x = X003, y = ec_ideo, colour = S020)) + 
       geom_smooth(method = "glm", aes(weight = S017)) + 
       labs(caption = "Linear regression plots stratified by survey wave", colour = "Survey wave (year)") + 
@@ -60,8 +60,13 @@ server <- function(input, output, session) {
       coord_cartesian(xlim = c(20, 80), ylim = c(0, 1)) 
   })
   
+  filter2 <- reactive({
+    filter(W_EVS) %>% 
+      filter(country == input$country2)
+  })
+  
   output$edu_plot <- renderPlot({
-    filtered() %>% 
+    filter2() %>% 
       ggplot(aes(x = resid(lm(X003 ~ edu, weights = S017)), 
                  y = resid(lm(ec_ideo ~ edu, weights = S017)), colour = S020)) + 
       geom_smooth(method = "glm") + 

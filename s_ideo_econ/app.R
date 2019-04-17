@@ -37,7 +37,7 @@ ui <- navbarPage("Model selection",
                           titlePanel("Economic Ideology and Ideological Self-Placement"), 
                           sidebarLayout(position = "right", 
                                         sidebarPanel(
-                                          selectInput("country_wave", label = "Country & survey year", 
+                                          selectInput("country_wave1", label = "Country & survey year", 
                                                       choices = levels(W_EVS$country_wave), 
                                                       selected = "United States 2011")), 
                                         mainPanel(plotOutput("n_edu_plot")))), 
@@ -45,22 +45,22 @@ ui <- navbarPage("Model selection",
                           titlePanel("Economic Ideology and Ideological Self-Placement"),
                           sidebarLayout(position = "right", 
                                         sidebarPanel(
-                                          selectInput("country_wave", label = "Country & survey year", 
+                                          selectInput("country_wave2", label = "Country & survey year", 
                                                       choices = levels(W_EVS$country_wave), 
                                                       selected = "United States 2011")), 
                                         mainPanel(plotOutput("edu_plot")))))
 
 # Define server
 
-server <- function(input, output, session) {
+server <- function(input, output) {
   
-  filtered <- reactive({
+  filter1 <- reactive({
     filter(W_EVS) %>% 
-      filter(country_wave == input$country_wave)
+      filter(country_wave == input$country_wave1)
   })
   
   output$n_edu_plot <- renderPlot({
-    filtered() %>% 
+    filter1() %>% 
       ggplot(aes(x = ec_ideo, y = self_ideo, colour = generation)) + 
       geom_smooth(method = "glm", aes(weight = S017)) + 
       labs(caption = "Linear regression plots stratified by generation", colour = "Generation (years born)") + 
@@ -73,8 +73,13 @@ server <- function(input, output, session) {
                                       "Gen X (1965-1980)", "Millennials (1981-1996)"))
   })
   
+  filter2 <- reactive({
+    filter(W_EVS) %>% 
+      filter(country_wave == input$country_wave2)
+  })
+  
   output$edu_plot <- renderPlot({
-    filtered() %>% 
+    filter2() %>% 
       ggplot(aes(x = resid(lm(ec_ideo ~ edu, weights = S017)), 
                  y = resid(lm(self_ideo ~ edu, weights = S017)), colour = generation)) + 
       geom_smooth(method = "glm") + 
@@ -93,4 +98,3 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
