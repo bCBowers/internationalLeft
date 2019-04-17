@@ -15,6 +15,7 @@ library(ggiraph)
 library(ggiraphExtra)
 library(MASS)
 library(car)
+library(reshape2)
 
 url_og <- getURL("https://raw.githubusercontent.com/jordan-klein/internationalLeft/master/WVS_viz_vars.csv")
 W_EVS_og <- read.csv(text = url_og)
