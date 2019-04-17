@@ -16,7 +16,7 @@ library(reshape2)
 url <- getURL("https://raw.githubusercontent.com/jordan-klein/internationalLeft/master/W_EVS_clean.csv")
 W_EVS <- read.csv(text = url)
 
-filter(W_EVS, !is.na(self_ideo) & !is.na(ec_ideo) & !is.na(generation)) %>% 
+filter(W_EVS, !is.na(self_ideo) & !is.na(ec_ideo) & !is.na(edu) & !is.na(generation)) %>% 
   mutate(country_wave = droplevels(country_wave)) -> W_EVS
 
 cw_list <- W_EVS %>% dlply('country_wave')
@@ -32,39 +32,65 @@ left_join(W_EVS, gen_index, by = c("country_wave" = "Var1", "generation" = "Var2
 
 # Define UI
 
-ui <- fluidPage(
-  titlePanel("Economic Ideology and Ideological Self-Placement"),
-  sidebarLayout(position = "right", 
-                sidebarPanel(
-                  selectInput("country_wave", label = "Country & survey year", 
-                              choices = levels(W_EVS$country_wave), selected = "United States 2011")),
-                mainPanel(
-                  plotOutput("scatterplot"))))
+ui <- navbarPage("Model selection", 
+                 tabPanel("Not adjusted for education", 
+                          titlePanel("Economic Ideology and Ideological Self-Placement"), 
+                          sidebarLayout(position = "right", 
+                                        sidebarPanel(
+                                          selectInput("country_wave", label = "Country & survey year", 
+                                                      choices = levels(W_EVS$country_wave), 
+                                                      selected = "United States 2011")), 
+                                        mainPanel(plotOutput("n_edu_plot")))), 
+                 tabPanel("Adjusted for education", 
+                          titlePanel("Economic Ideology and Ideological Self-Placement"),
+                          sidebarLayout(position = "right", 
+                                        sidebarPanel(
+                                          selectInput("country_wave", label = "Country & survey year", 
+                                                      choices = levels(W_EVS$country_wave), 
+                                                      selected = "United States 2011")), 
+                                        mainPanel(plotOutput("edu_plot")))))
 
 # Define server
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   filtered <- reactive({
     filter(W_EVS) %>% 
       filter(country_wave == input$country_wave)
   })
   
-  output$scatterplot <- renderPlot({
+  output$n_edu_plot <- renderPlot({
     filtered() %>% 
       ggplot(aes(x = ec_ideo, y = self_ideo, colour = generation)) + 
       geom_smooth(method = "glm", aes(weight = S017)) + 
       labs(caption = "Linear regression plots stratified by generation", colour = "Generation (years born)") + 
-      scale_x_continuous("Economic Ideology (left to right)", breaks = c(0, .25, .5, .75, 1)) + 
+      scale_x_continuous("Economic Ideology (left to right)", breaks = c(0, .2, .4, .6, .8, 1)) + 
       scale_y_continuous("Ideological self-placement (left to right)", breaks = c(1, 4, 7, 10)) + 
       theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15)) + 
-      coord_cartesian(xlim = c(0, 1), ylim = c(1, 10)) + 
+      coord_cartesian(xlim = c(.2, .8), ylim = c(1, 10)) + 
       scale_color_discrete(breaks = c("Greatest", "Silent", "Boomers", "Gen X", "Millennials"), 
                            labels = c("Greatest (pre-1928)", "Silent (1928-1945)", "Boomers (1946-1964)", 
                                       "Gen X (1965-1980)", "Millennials (1981-1996)"))
-    
   })
+  
+  output$edu_plot <- renderPlot({
+    filtered() %>% 
+      ggplot(aes(x = resid(lm(ec_ideo ~ edu, weights = S017)), 
+                 y = resid(lm(self_ideo ~ edu, weights = S017)), colour = generation)) + 
+      geom_smooth(method = "glm") + 
+      labs(caption = "Partial multiple linear regression plots adjusted for education, stratified by generation", 
+           colour = "Generation (years born)") + 
+      scale_x_continuous("Economic Ideology (left to right, residuals)", breaks = c(-.5, -.3, -.1, .1, .3, .5)) + 
+      scale_y_continuous("Ideological self-placement (left to right, residuals)", breaks = c(-4.5, -1.5, 1.5, 4.5)) + 
+      theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15)) + 
+      coord_cartesian(xlim = c(-.3, .3), ylim = c(-4.5, 4.5)) + 
+      scale_color_discrete(breaks = c("Greatest", "Silent", "Boomers", "Gen X", "Millennials"), 
+                           labels = c("Greatest (pre-1928)", "Silent (1928-1945)", "Boomers (1946-1964)", 
+                                      "Gen X (1965-1980)", "Millennials (1981-1996)"))
+  })
+  
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
