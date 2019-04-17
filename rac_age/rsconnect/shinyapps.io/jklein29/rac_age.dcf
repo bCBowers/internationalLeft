@@ -1,0 +1,12 @@
+name: rac_age
+title: rac_age
+username:
+account: jklein29
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 870363
+bundleId: 2017484
+url: https://jklein29.shinyapps.io/rac_age/
+when: 1555472895.66516
+asMultiple: FALSE
+asStatic: FALSE

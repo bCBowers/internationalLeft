@@ -5,8 +5,8 @@ account: jklein29
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 870291
-bundleId: 2016968
+bundleId: 2017491
 url: https://jklein29.shinyapps.io/econ_age/
-when: 1555451915.67638
+when: 1555473141.75002
 asMultiple: FALSE
 asStatic: FALSE
