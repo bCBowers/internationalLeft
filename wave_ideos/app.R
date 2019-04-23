@@ -13,7 +13,7 @@ library(RCurl)
 library(stargazer)
 library(reshape2)
 library(gridExtra)
-library(shinyBS)
+library(ggiraph)
 
 url <- getURL("https://raw.githubusercontent.com/jordan-klein/internationalLeft/master/W_EVS_clean.csv")
 W_EVS <- read.csv(text = url)
@@ -78,20 +78,24 @@ select(id_ec_rac, s_id_rac, wave_no, country) %>%
 names(rac_waves) <- c("country", "id_rac_1", "id_rac_2", "id_rac_3", 
                       "id_rac_4", "id_rac_5", "id_rac_6")
 
+select(id_ec_rac, country_wave, wave_no, country) %>% 
+  spread(wave_no, country_wave) -> c_waves
+
+names(c_waves) <- c("country", "wav_1", "wav_2", "wav_3", "wav_4", "wav_5", "wav_6")
+
 left_join(id_ec_rac, econ_waves) %>% 
-  left_join(rac_waves) -> id_viz
+  left_join(rac_waves) %>% 
+  left_join(c_waves) -> id_viz
 
 # UI
 
 ui <- fluidPage(
-  titlePanel("Effect of Economic Ideology vs Racial Resentment on Ideological Self-Placement"), 
+  titlePanel("Effect of Economic Ideology  vs. Racial Resentment on Ideological Self-Placement"), 
   sidebarLayout(position = "right", 
                 sidebarPanel(
                   checkboxGroupInput("checkGroup", label = "Country", 
                                      choices = levels(id_viz$country), selected = "United States")),
-                mainPanel(plotOutput("plot", hover = hoverOpts("plot_hover", delay = 10, delayType = "debounce")), 
-                          uiOutput("hover_info"))))
-
+                mainPanel(ggiraphOutput("plot"))))
 
 # Server
 
@@ -102,15 +106,15 @@ server <- function(input, output) {
       filter(country == input$checkGroup)
   })
   
-  output$plot <- renderPlot({
+  output$plot <- renderggiraph({
     plot_data() %>% 
-    ggplot(aes(x = s_id_econ, y = s_id_rac, colour = country, labels = country_wave)) + 
-      geom_point(aes(x = id_ec_1, y = id_rac_1)) + 
-      geom_point(aes(x = id_ec_2, y = id_rac_2)) + 
-      geom_point(aes(x = id_ec_3, y = id_rac_3)) +
-      geom_point(aes(x = id_ec_4, y = id_rac_4)) +
-      geom_point(aes(x = id_ec_5, y = id_rac_5)) +
-      geom_point(aes(x = id_ec_6, y = id_rac_6)) +
+      ggplot(aes(x = s_id_econ, y = s_id_rac)) + 
+      geom_point_interactive(aes(x = id_ec_1, y = id_rac_1, tooltip = wav_1)) + 
+      geom_point_interactive(aes(x = id_ec_2, y = id_rac_2, tooltip = wav_2)) + 
+      geom_point_interactive(aes(x = id_ec_3, y = id_rac_3, tooltip = wav_3)) +
+      geom_point_interactive(aes(x = id_ec_4, y = id_rac_4, tooltip = wav_4)) +
+      geom_point_interactive(aes(x = id_ec_5, y = id_rac_5, tooltip = wav_5)) +
+      geom_point_interactive(aes(x = id_ec_6, y = id_rac_6, tooltip = wav_6)) +
       geom_segment(aes(x = id_ec_1, y = id_rac_1, 
                        xend = id_ec_2, yend = id_rac_2), 
                    arrow = arrow(length = unit(.1, "inches"))) + 
@@ -126,83 +130,16 @@ server <- function(input, output) {
       geom_segment(aes(x = id_ec_5, y = id_rac_5, 
                        xend = id_ec_6, yend = id_rac_6), 
                    arrow = arrow(length = unit(.1, "inches"))) +
-      labs(caption = "Scatterplot with trends over time", 
-           colour = "Country") + 
-      scale_x_continuous("Effect of economic ideology on ideological self-placement", breaks = c(-4, -2, 0, 2, 4, 6, 8)) + 
-      scale_y_continuous("Effect of racial resentment on ideological self-placement", breaks = c(-2, -1, 0, 1, 2, 3, 4)) + 
-      theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15)) + 
-      coord_cartesian(xlim = c(-2, 8), ylim = c(-2, 3))
+      labs(caption = "Scatterplot with trends over time", colour = "Country") + 
+      scale_x_continuous("Effect of economic ideology on placement", breaks = c(-4, -2, 0, 2, 4, 6, 8)) + 
+      scale_y_continuous("Effect of racial resentment on placement", breaks = c(-2, -1, 0, 1, 2, 3, 4)) + 
+      theme(axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12)) + 
+      coord_cartesian(xlim = c(-2, 8), ylim = c(-2, 3)) -> gg_plot    
+    
+    girafe(code = print(gg_plot), width_svg = 8, height_svg = 8, pointsize = 10)
   })
   
-  output$hover_info <- renderUI({
-    hover <- input$plot_hover
-    point <- nearPoints(plot_data(), hover, threshold = 5, maxpoints = 1)[, 1]
-    
-    req(nrow(point) != 0)
-    
-    paste(point)
-  })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
-
-
-server <- function(input, output) {
-  
-  plot_data <- reactive({
-    filter(id_viz) %>% 
-      filter(country == input$checkGroup)
-  })
-  
-  output$plot <- renderPlot({
-    plot_data() %>% 
-      ggplot(aes(x = s_id_econ, y = s_id_rac, colour = country, labels = country_wave)) + 
-      geom_point(aes(x = id_ec_1, y = id_rac_1)) + 
-      geom_point(aes(x = id_ec_2, y = id_rac_2)) + 
-      geom_point(aes(x = id_ec_3, y = id_rac_3)) +
-      geom_point(aes(x = id_ec_4, y = id_rac_4)) +
-      geom_point(aes(x = id_ec_5, y = id_rac_5)) +
-      geom_point(aes(x = id_ec_6, y = id_rac_6)) +
-      geom_segment(aes(x = id_ec_1, y = id_rac_1, 
-                       xend = id_ec_2, yend = id_rac_2), 
-                   arrow = arrow(length = unit(.1, "inches"))) + 
-      geom_segment(aes(x = id_ec_2, y = id_rac_2, 
-                       xend = id_ec_3, yend = id_rac_3), 
-                   arrow = arrow(length = unit(.1, "inches"))) + 
-      geom_segment(aes(x = id_ec_3, y = id_rac_3, 
-                       xend = id_ec_4, yend = id_rac_4), 
-                   arrow = arrow(length = unit(.1, "inches"))) + 
-      geom_segment(aes(x = id_ec_4, y = id_rac_4, 
-                       xend = id_ec_5, yend = id_rac_5), 
-                   arrow = arrow(length = unit(.1, "inches"))) + 
-      geom_segment(aes(x = id_ec_5, y = id_rac_5, 
-                       xend = id_ec_6, yend = id_rac_6), 
-                   arrow = arrow(length = unit(.1, "inches"))) +
-      labs(caption = "Scatterplot with trends over time", 
-           colour = "Country") + 
-      scale_x_continuous("Effect of economic ideology on ideological self-placement", breaks = c(-4, -2, 0, 2, 4, 6, 8)) + 
-      scale_y_continuous("Effect of racial resentment on ideological self-placement", breaks = c(-2, -1, 0, 1, 2, 3, 4)) + 
-      theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15)) + 
-      coord_cartesian(xlim = c(-2, 8), ylim = c(-2, 3))
-  })
-  
-  displayed_text <- reactive({
-    req(input$plot_hover)
-    hover <- input$plot_hover
-    dist <- sqrt((hover$x - plot_data()$s_id_econ)^2 + (hover$y - plot_data()$s_id_rac)^2)
-    
-    if(min(dist) < 0.3) {
-      as.character(plot_data()$country_wave[which.min(dist)])
-    } else {
-      NULL
-    }
-  })
-  
-  output$hover_info <- renderPrint({
-    req(displayed_text())
-    
-    displayed_text()
-  })
-}
