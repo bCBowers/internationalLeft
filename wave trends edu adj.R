@@ -23,32 +23,32 @@ cw_list <- W_EVS %>% dlply('country_wave')
 # Create coefficient matrix
 
 lapply(cw_list, function(x) {
-  filter(x, !is.na(self_ideo) & !is.na(ec_ideo))
+  filter(x, !is.na(self_ideo) & !is.na(ec_ideo) & !is.na(edu))
 }) %>% 
   .[sapply(., function(x) {
     dim(x)[1] > 0
   })] %>% 
   lapply(function(x) {
-    model <- lm(self_ideo ~ ec_ideo, data = x, weights = S017)
-    return(data.frame(s_id_econ = model$coefficients[2]))
-  }) %>% 
+    model <- lm(self_ideo ~ ec_ideo + edu, data = x, weights = S017)
+    return(data.frame(id_econ_edu = model$coefficients[2]))
+  }) %>%
   do.call(rbind.data.frame, .) %>% 
-  data.frame(country_wave = row.names(.), .) -> s_id_econ
+  data.frame(country_wave = row.names(.), .) -> id_econ_edu
 
 lapply(cw_list, function(x) {
-  filter(x, !is.na(self_ideo) & !is.na(RacRes_n))
+  filter(x, !is.na(self_ideo) & !is.na(RacRes_n) & !is.na(edu))
 }) %>% 
   .[sapply(., function(x) {
     dim(x)[1] > 0
   })] %>% 
   lapply(function(x) {
-    model <- lm(self_ideo ~ RacRes_n, data = x, weights = S017)
-    return(data.frame(s_id_rac = model$coefficients[2]))
+    model <- lm(self_ideo ~ RacRes_n + edu, data = x, weights = S017)
+    return(data.frame(id_rac_edu = model$coefficients[2]))
   }) %>% 
   do.call(rbind.data.frame, .) %>% 
-  data.frame(country_wave = row.names(.), .) -> s_id_rac
+  data.frame(country_wave = row.names(.), .) -> id_rac_edu
 
-id_ec_rac <- inner_join(s_id_econ, s_id_rac)
+id_ec_rac <- inner_join(id_econ_edu, id_rac_edu)
 
 combined <- sort(union(levels(W_EVS$country_wave), levels(id_ec_rac$country_wave)))
 
@@ -66,17 +66,17 @@ lapply(id_list, function(x) {
   do.call(rbind.data.frame, .) %>% 
   left_join(id_ec_rac, .) -> id_ec_rac
 
-select(id_ec_rac, s_id_econ, wave_no, country) %>% 
-  spread(wave_no, s_id_econ) -> econ_waves 
+select(id_ec_rac, id_econ_edu, wave_no, country) %>% 
+  spread(wave_no, id_econ_edu) -> econ_waves 
 
 names(econ_waves) <- c("country", "id_ec_1", "id_ec_2", "id_ec_3", 
                        "id_ec_4", "id_ec_5", "id_ec_6")
 
-select(id_ec_rac, s_id_rac, wave_no, country) %>% 
-  spread(wave_no, s_id_rac) -> rac_waves 
+select(id_ec_rac, id_rac_edu, wave_no, country) %>% 
+  spread(wave_no, id_rac_edu) -> rac_waves 
 
 names(rac_waves) <- c("country", "id_rac_1", "id_rac_2", "id_rac_3", 
-                       "id_rac_4", "id_rac_5", "id_rac_6")
+                      "id_rac_4", "id_rac_5", "id_rac_6")
 
 select(id_ec_rac, country_wave, wave_no, country) %>% 
   spread(wave_no, country_wave) -> c_waves
@@ -89,7 +89,7 @@ left_join(id_ec_rac, econ_waves) %>%
 
 ### Visualization
 
-plot <- ggplot(data = id_viz, aes(x = s_id_econ, y = s_id_rac, colour = country)) + 
+plot <- ggplot(data = id_viz, aes(x = id_econ_edu, y = id_rac_edu, colour = country)) + 
   geom_point_interactive(aes(x = id_ec_1, y = id_rac_1, tooltip = wav_1)) + 
   geom_point_interactive(aes(x = id_ec_2, y = id_rac_2, tooltip = wav_2)) + 
   geom_point_interactive(aes(x = id_ec_3, y = id_rac_3, tooltip = wav_3)) +
@@ -111,7 +111,7 @@ plot <- ggplot(data = id_viz, aes(x = s_id_econ, y = s_id_rac, colour = country)
   geom_segment(aes(x = id_ec_5, y = id_rac_5, 
                    xend = id_ec_6, yend = id_rac_6), 
                arrow = arrow(length = unit(.1, "inches"))) +
-  labs(caption = "Scatterplot with trends over time", colour = "Country",
+  labs(caption = "Scatterplot with trends over time, adjusted for education", colour = "Country",
        title = "Effect of Economic Ideology  vs. Racial Resentment on Ideological Self-Placement") + 
   scale_x_continuous("Effect of economic ideology on placement", breaks = c(-4, -2, 0, 2, 4, 6, 8)) + 
   scale_y_continuous("Effect of racial resentment on placement", breaks = c(-2, -1, 0, 1, 2, 3, 4)) + 
