@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1556090572632.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "689DA9EB",
+    "lastKnownWriteTime" : 6,
+    "last_content_update" : 1556090572632,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "BCD2C155",
+        "caption" : "econ_waves_edu",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=econ_waves_edu&cache_key=BCD2C155",
+        "displayedObservations" : 36,
+        "environment" : "",
+        "object" : "econ_waves_edu",
+        "preview" : 0,
+        "totalObservations" : 36,
+        "variables" : 7
+    },
+    "relative_order" : 12,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

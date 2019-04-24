@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1556089896748.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "33700889",
+    "lastKnownWriteTime" : 4294967302,
+    "last_content_update" : 1556089896748,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "485CCE75",
+        "caption" : "id_ec_rac_edu",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=id_ec_rac_edu&cache_key=485CCE75",
+        "displayedObservations" : 103,
+        "environment" : "",
+        "object" : "id_ec_rac_edu",
+        "preview" : 0,
+        "totalObservations" : 103,
+        "variables" : 3
+    },
+    "relative_order" : 11,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
