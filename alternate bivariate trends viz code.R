@@ -101,19 +101,19 @@ lapply(id_list, function(x) {
   do.call(rbind.data.frame, .) %>% 
   left_join(id_ec_rac, .) -> id_ec_rac
 
-select(id_ec_rac, s_id_econ, wave_no, country) %>% 
+dplyr::select(id_ec_rac, s_id_econ, wave_no, country) %>% 
   spread(wave_no, s_id_econ) -> econ_waves 
 
 names(econ_waves) <- c("country", "id_ec_1", "id_ec_2", "id_ec_3", 
                        "id_ec_4", "id_ec_5", "id_ec_6")
 
-select(id_ec_rac, s_id_rac, wave_no, country) %>% 
+dplyr::select(id_ec_rac, s_id_rac, wave_no, country) %>% 
   spread(wave_no, s_id_rac) -> rac_waves 
 
 names(rac_waves) <- c("country", "id_rac_1", "id_rac_2", "id_rac_3", 
                       "id_rac_4", "id_rac_5", "id_rac_6")
 
-select(id_ec_rac, country_wave, wave_no, country) %>% 
+dplyr::select(id_ec_rac, country_wave, wave_no, country) %>% 
   spread(wave_no, country_wave) -> c_waves
 
 names(c_waves) <- c("country", "wav_1", "wav_2", "wav_3", "wav_4", "wav_5", "wav_6")
@@ -134,19 +134,19 @@ lapply(id_list_edu, function(x) {
   do.call(rbind.data.frame, .) %>% 
   left_join(id_ec_rac_edu, .) -> id_ec_rac_edu
 
-select(id_ec_rac_edu, id_econ_edu, wave_no, country) %>% 
+dplyr::select(id_ec_rac_edu, id_econ_edu, wave_no, country) %>% 
   spread(wave_no, id_econ_edu) -> econ_waves_edu 
 
 names(econ_waves_edu) <- c("country", "id_ec_1", "id_ec_2", "id_ec_3", 
                            "id_ec_4", "id_ec_5", "id_ec_6")
 
-select(id_ec_rac_edu, id_rac_edu, wave_no, country) %>% 
+dplyr::select(id_ec_rac_edu, id_rac_edu, wave_no, country) %>% 
   spread(wave_no, id_rac_edu) -> rac_waves_edu 
 
 names(rac_waves_edu) <- c("country", "id_rac_1", "id_rac_2", "id_rac_3", 
                           "id_rac_4", "id_rac_5", "id_rac_6")
 
-select(id_ec_rac_edu, country_wave, wave_no, country) %>% 
+dplyr::select(id_ec_rac_edu, country_wave, wave_no, country) %>% 
   spread(wave_no, country_wave) -> c_waves_edu
 
 names(c_waves_edu) <- c("country", "wav_1", "wav_2", "wav_3", "wav_4", "wav_5", "wav_6")

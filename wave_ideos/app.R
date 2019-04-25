@@ -68,19 +68,19 @@ lapply(id_list, function(x) {
   do.call(rbind.data.frame, .) %>% 
   left_join(id_ec_rac, .) -> id_ec_rac
 
-select(id_ec_rac, s_id_econ, wave_no, country) %>% 
+dplyr::select(id_ec_rac, s_id_econ, wave_no, country) %>% 
   spread(wave_no, s_id_econ) -> econ_waves 
 
 names(econ_waves) <- c("country", "id_ec_1", "id_ec_2", "id_ec_3", 
                        "id_ec_4", "id_ec_5", "id_ec_6")
 
-select(id_ec_rac, s_id_rac, wave_no, country) %>% 
+dplyr::select(id_ec_rac, s_id_rac, wave_no, country) %>% 
   spread(wave_no, s_id_rac) -> rac_waves 
 
 names(rac_waves) <- c("country", "id_rac_1", "id_rac_2", "id_rac_3", 
                       "id_rac_4", "id_rac_5", "id_rac_6")
 
-select(id_ec_rac, country_wave, wave_no, country) %>% 
+dplyr::select(id_ec_rac, country_wave, wave_no, country) %>% 
   spread(wave_no, country_wave) -> c_waves
 
 names(c_waves) <- c("country", "wav_1", "wav_2", "wav_3", "wav_4", "wav_5", "wav_6")
@@ -98,7 +98,9 @@ ui <- fluidPage(
   sidebarLayout(position = "right", 
                 sidebarPanel(
                   checkboxGroupInput("checkGroup", label = "Country", 
-                                     choices = levels(id_viz$country), selected = levels(id_viz$country)), 
+                                     choices = levels(id_viz$country), selected = c("Poland", "Czech Republic", 
+                                                                                    "United States", "Sweden", 
+                                                                                    "Mexico", "Germany")), 
                   width = 2), 
                 mainPanel(ggiraphOutput("plot"), width = 10))
 )
@@ -144,7 +146,8 @@ server <- function(input, output) {
       scale_color_manual(values = c(rainbow_hcl(length(unique(id_viz$country)))), 
                          name = "Country", drop = F) +
       labs(caption = "Scatterplot with trends over time") +
-      scale_x_continuous("Correlation of economic ideology with self-placement", breaks = c(-.1, 0, .1, .2, .3, .4, .5, .6)) + 
+      scale_x_continuous("Correlation of economic ideology with self-placement", 
+                         breaks = c(-.1, 0, .1, .2, .3, .4, .5, .6)) + 
       scale_y_continuous("Correlation of racial resentment with self-placement", breaks = c(-.1, 0, .1, .2, .3, .4)) + 
       theme(axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15), 
             legend.title = element_text(size = 10), legend.text = element_text(size = 8), 
