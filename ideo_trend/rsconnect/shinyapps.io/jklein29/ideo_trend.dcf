@@ -1,0 +1,12 @@
+name: ideo_trend
+title: ideo_trend
+username:
+account: jklein29
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 889481
+bundleId: 2037430
+url: https://jklein29.shinyapps.io/ideo_trend/
+when: 1556163340.89894
+asMultiple: FALSE
+asStatic: FALSE
