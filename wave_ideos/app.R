@@ -15,6 +15,7 @@ library(reshape2)
 library(gridExtra)
 library(ggiraph)
 library(colorspace)
+library(wCorr)
 
 url <- getURL("https://raw.githubusercontent.com/jordan-klein/internationalLeft/master/W_EVS_clean.csv")
 W_EVS <- read.csv(text = url)
@@ -30,8 +31,8 @@ lapply(cw_list, function(x) {
     dim(x)[1] > 0
   })] %>% 
   lapply(function(x) {
-    model <- lm(self_ideo ~ ec_ideo, data = x, weights = S017)
-    return(data.frame(s_id_econ = model$coefficients[2]))
+    corr <- weightedCorr(x$ec_ideo, x$self_ideo, "Pearson", x$S017)
+    return(data.frame(s_id_econ = corr))
   }) %>% 
   do.call(rbind.data.frame, .) %>% 
   data.frame(country_wave = row.names(.), .) -> s_id_econ
