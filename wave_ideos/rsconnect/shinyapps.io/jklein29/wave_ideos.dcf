@@ -5,8 +5,8 @@ account: jklein29
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 886879
-bundleId: 2037421
+bundleId: 2047682
 url: https://jklein29.shinyapps.io/wave_ideos/
-when: 1556163043.28988
+when: 1556567347.66441
 asMultiple: FALSE
 asStatic: FALSE
