@@ -1,46 +1,46 @@
-### Import data
+#### Load packages & import data ####
 
-library(shiny)
-library(ggplot2)
+# Load packages
+
 library(tidyverse)
-library(ggrepel)
-library(survey)
-library(rvest)
-library(plyr)
-library(broom)
-library(knitr)
-library(RCurl)
 library(MASS)
+library(plyr)
+
+# Import data
 
 W_EVS <- read.csv("W_EVS_clean.csv")
 
-# Create racial resentment factor variable
+#### Data manipulation ####
 
-W_EVS <- W_EVS %>% mutate(RacRes = case_when(rac_ideo == 0 ~ "Very low", 
-                                             rac_ideo > 0 & rac_ideo <= .25 ~ "Low", 
-                                             rac_ideo > .25 & rac_ideo <= .5 ~ "Moderate", 
-                                             rac_ideo > .5 & rac_ideo <= .75 ~ "High", 
-                                             rac_ideo > .75 ~ "Very high")) %>% 
-  mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
+# Fix racial resentment factor variable levels
 
-# Ordinal logistic regression
+W_EVS <- W_EVS %>% mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
 
-library(MASS)
+# Split by country & survey wave
 
-country_list <- W_EVS %>% dlply('country')
+cw_list <- W_EVS %>% dlply('country_wave')
 
-lapply(country_list, function(x) {
-  models <- polr(RacRes ~ ec_ideo, data = x, weights = S017, Hess = T)
-  ctable <- coef(summary(models))
-  p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
-  ctable <- cbind(ctable, "p value" = p)
-  return(ctable)
-})
+#### Data Analysis ####
 
-lapply(country_list, function(x) {
-  models <- polr(RacRes ~ ec_ideo + edu + relig, data = x, weights = S017, Hess = T)
-  ctable <- coef(summary(models))
-  p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
-  ctable <- cbind(ctable, "p value" = p)
-  stargazer(ctable)
-})
+# Create coefficient matrix
+
+lapply(cw_list, function(x) {
+  filter(x, !is.na(RacRes) & !is.na(ec_ideo) & !is.na(edu) & !is.na(relig))
+}) %>% 
+  .[sapply(., function(x) {
+    dim(x)[1] > 0
+  })] %>% 
+  lapply(function(x) {
+    model <- polr(RacRes ~ ec_ideo + edu + relig, data = x, weights = S017, Hess = T)
+    return(data.frame(Coefficient = model$coefficients[1]))
+  }) %>% 
+  do.call(rbind.data.frame, .) %>% 
+  data.frame(Country_survey_year = row.names(.), .) -> c_matr
+
+# Sort by coefficient
+
+c_matr <- c_matr[order(c_matr$Coefficients, decreasing = T), ]
+
+#### Export as csv ####
+
+write.csv(c_matr, "OL_coefficients.csv", row.names = F)
