@@ -1,6 +1,5 @@
 ---
-title: "Relationship between Economic Ideology and Racial Resentment"
-author: "Jordan Klein"
+title: "Association between Economic Ideology and Racial Resentment"
 output:
   pdf_document: default
   html_document: default
@@ -8,12 +7,12 @@ output:
 
 *A cross-national comparison, adjusted for educational attainment and relgious service attendance*
 
-*Higher coefficients indicate a stronger relationship between right-wing economic ideology and higher levels of racial resentment (and between left-wing economic ideology and lower levels of racial resentment)*
+*Higher coefficients indicate a stronger association between right-wing economic ideology and higher levels of racial resentment (and between left-wing economic ideology and lower levels of racial resentment)*
 
 *Method: Ordinal logistic regression*
 
 ```{r code, include=FALSE}
-### Import data
+# Load packages & data
 
 library(shiny)
 library(ggplot2)
@@ -26,35 +25,51 @@ library(broom)
 library(knitr)
 library(RCurl)
 library(stargazer)
+library(reshape2)
+library(gridExtra)
+library(ggiraph)
+library(colorspace)
 library(MASS)
+library(lubridate)
 
-url <- getURL("https://raw.githubusercontent.com/Jklein29/internationalLeft/master/WVS_viz_vars.csv")
+url <- getURL("https://raw.githubusercontent.com/jordan-klein/internationalLeft/master/W_EVS_clean.csv")
 W_EVS <- read.csv(text = url)
 
-# Create racial resentment factor variable
+W_EVS <- W_EVS %>% mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
 
-W_EVS <- W_EVS %>% mutate(RacRes = case_when(rac_ideo == 0 ~ "Very low", 
-                                             rac_ideo > 0 & rac_ideo <= .25 ~ "Low", 
-                                             rac_ideo > .25 & rac_ideo <= .5 ~ "Moderate", 
-                                             rac_ideo > .5 & rac_ideo <= .75 ~ "High", 
-                                             rac_ideo > .75 ~ "Very high")) %>% 
-  mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
+cw_list <- W_EVS %>% dlply('country_wave')
 
-# Split into list by country
+# Create coefficient matrix
 
-country_list <- W_EVS %>% dlply('country')
-
-## Modeling
-
-lapply(country_list, function(x) {
-  model <- polr(RacRes ~ ec_ideo + edu + relig, data = x, weights = S017, Hess = T)
-  return(data.frame(Coefficients = model$coefficients[1]))
+lapply(cw_list, function(x) {
+  filter(x, !is.na(RacRes) & !is.na(ec_ideo) & !is.na(edu) & !is.na(relig))
 }) %>% 
-  do.call(rbind.data.frame, .) -> coeff.tab
+  .[sapply(., function(x) {
+    dim(x)[1] > 0
+  })] %>% 
+  lapply(function(x) {
+    model <- polr(RacRes ~ ec_ideo + edu + relig, data = x, weights = S017, Hess = T)
+    return(data.frame(rac_ec_adj = model$coefficients[1]))
+  }) %>% 
+  do.call(rbind.data.frame, .) %>% 
+  data.frame(country_wave = row.names(.), .) -> rac_ec_adj
 
-POLR.tab <- coeff.tab[order(coeff.tab$Coefficients, decreasing = T), , drop = F]
+combined_adj <- sort(union(levels(W_EVS$country_wave), levels(rac_ec_adj$country_wave)))
+
+left_join(mutate(rac_ec_adj, country_wave = factor(country_wave, levels = combined_adj)), 
+          mutate(unique(dplyr::select(W_EVS, country_wave, country, S020)), 
+                 country_wave = factor(country_wave, levels = combined_adj))) -> rac_ec_adj
+
+rac_ec_adj %>% mutate(S020 = as.Date(ISOdate(S020, 1, 1))) %>% 
+  mutate(country = droplevels(country)) -> rac_ec_adj
+
+names(rac_ec_adj)[2] <- "Coefficients"
+
+names(rac_ec_adj)[1] <- "`Country & survey year`"
+
+POLR.tab <- rac_ec_adj[order(rac_ec_adj$Coefficients, decreasing = T), c(1:2)]
 ```
 
 ```{r echo=FALSE, results='asis'}
-kable(POLR.tab)
+kable(POLR.tab, row.names = F)
 ```
