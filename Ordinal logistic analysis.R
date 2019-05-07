@@ -10,9 +10,9 @@ library(plyr)
 library(broom)
 library(knitr)
 library(RCurl)
+library(MASS)
 
-url <- getURL("https://raw.githubusercontent.com/Jklein29/internationalLeft/master/WVS_viz_vars.csv")
-W_EVS <- read.csv(text = url)
+W_EVS <- read.csv("W_EVS_clean.csv")
 
 # Create racial resentment factor variable
 

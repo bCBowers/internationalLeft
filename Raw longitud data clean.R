@@ -1,13 +1,12 @@
+#### Load packages & import data ####
+
 # Load packages
 
 library(tidyverse)
-library(ggrepel)
 library(survey)
 library(rvest)
 library(plyr)
 library(broom)
-library(knitr)
-library(stargazer)
 
 # Import data
 
@@ -15,9 +14,9 @@ Raw <- read.csv(unz("W_EVS.csv.zip", "W_EVS.csv"))
 
 W_EVS <- Raw
 
-## Code countries
+#### Select OECD countries ####
 
-# Import country codes 
+# Scrape country codes
 
 wvs_git <- read_html("https://github.com/xmarquez/WorldValuesSurvey/blob/master/Country%20codes%20for%20WVS%20wave%206.csv")
 
@@ -35,7 +34,7 @@ W_EVS <- W_EVS %>% left_join(countryCodes, by = c("S003" = "V2"))
 W_EVS <- W_EVS %>% mutate(country = replace(country, country == "Czech Rep.", "Czech Republic"))
 W_EVS <- W_EVS %>% mutate(country = replace(country, country == "North Ireland", "Northern Ireland"))
 
-# Import OECD countries
+# Scrape OECD countries
 
 wiki <- read_html("https://en.wikipedia.org/wiki/OECD")
 
@@ -48,7 +47,9 @@ OECD <- OECD[[1]]
 
 W_EVS <- W_EVS %>% filter(country %in% OECD$Country | country == "Great Britain" | country == "Northern Ireland")
 
-# Clean data
+#### Prepare variables for analysis ####
+
+# Clean variables
 
 W_EVS <- W_EVS %>%  mutate(A124_02 = replace(A124_02, A124_02 == 0, 2), 
                            A124_06 = replace(A124_06, A124_06 == 0, 2), 
@@ -63,7 +64,7 @@ W_EVS[, c("E035", "E036", "E037", "E039", "A124_02", "A124_06", "C002", "X025", 
     replace(x, x < 1, NA)
   })
 
-# Create indices
+# Create indices (economic/racial attitudes, education, religion)
 
 W_EVS <- W_EVS %>% mutate(ec_ideo = (((E035 + 8)/9) * ((abs(E036 - 11) + 8)/9) * 
                                        ((abs(E037 - 11) + 8)/9) * ((abs(E039 - 11) + 8)/9))^(1/4) - 1) %>%
@@ -73,7 +74,7 @@ W_EVS <- W_EVS %>% mutate(ec_ideo = (((E035 + 8)/9) * ((abs(E036 - 11) + 8)/9) *
 W_EVS <- W_EVS %>% mutate(edu = X025)
 W_EVS <- W_EVS %>% mutate(relig = F028)
 
-# Create racial resentment factor variable
+# Create racial resentment factor variable (& numeric)
 
 W_EVS <- W_EVS %>% mutate(RacRes = case_when(rac_ideo == 0 ~ "Very low", 
                                              rac_ideo > 0 & rac_ideo <= .25 ~ "Low", 
@@ -86,13 +87,13 @@ W_EVS <- W_EVS %>% mutate(RacRes_n = case_when(RacRes == "Very low" ~ 0,
                                                RacRes == "Low" ~ .25, RacRes == "Moderate" ~ .5, 
                                                RacRes == "High" ~ .75, RacRes == "Very high" ~ 1))
 
-# ideological vars
+# Create ideology variables
 
 W_EVS <- W_EVS %>% mutate(self_ideo = E033)
 W_EVS <- W_EVS %>% mutate(vote_ideo = case_when(!is.na(E179_01) ~ E179_01, 
                                                 is.na(E179_01) ~ E181_01))
 
-# generation
+# Create generation variable
 
 W_EVS <- W_EVS %>% mutate(generation = case_when(X002 < 1928 ~ "Greatest", 
                                                  X002 >= 1928 & X002 < 1946 ~ "Silent", 
@@ -101,11 +102,10 @@ W_EVS <- W_EVS %>% mutate(generation = case_when(X002 < 1928 ~ "Greatest",
                                                  X002 >= 1981 & X002 < 1997 ~ "Millennials", 
                                                  X002 >= 1997 ~ "Gen Z"))
 
-# Creation of country-wave variable
+# Create country+survey wave variable
 
 W_EVS <- W_EVS %>% mutate(country_wave = paste(country, S020))
 
-# Export W_EVS clean
+# Export clean data
 
 write.csv(W_EVS, "W_EVS_clean.csv")
-
