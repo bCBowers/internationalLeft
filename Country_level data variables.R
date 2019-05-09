@@ -316,7 +316,17 @@ imm_plot <- ggplot(aes(x = Immigrants, y = Coefficients, color = Country), data 
   ggtitle("Foreign Born Population vs. Economic Ideology-Racial Resentment Association") +
   theme(title = element_text(size = 9))
 
-girafe(code = print(imm_plot))
+girafe(code = print(imm_plot), width_svg = 10)
+
+gdp_plot <- ggplot(aes(x = GDP_pc, y = Coefficients, color = Country), data = wvs_full) + 
+  geom_smooth(method = "glm", aes(x = GDP_pc, y = Coefficients), inherit.aes = F) + 
+  geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) + 
+  geom_label_repel(data = filter(wvs_full, Country == "United States"), 
+                   aes(x = GDP_pc, y = Coefficients, label = Country_survey_year), 
+                   segment.color = "black", box.padding = unit(.35, "lines"), point.padding = unit(.5, "lines"), 
+                   arrow = arrow(length = unit(.3, "lines")), size = 2.5)
+
+girafe(code = print(gdp_plot), width_svg = 10)
 
 # Partial regression plots
 
@@ -325,24 +335,32 @@ wvs_narm <- na.omit(wvs_full)
 gini_plot <- ggplot(aes(x = resid(glm(GINI ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist)), 
                         y = resid(glm(Coefficients ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist)), 
                         color = Country), data = wvs_narm) + 
-  geom_point_interactive(aes(tooltip = Country_survey_year)) +
   geom_smooth(method = "glm", 
               aes(x = resid(glm(GINI ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist)), 
                   y = resid(glm(Coefficients ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist))), 
-              inherit.aes = F)
+              inherit.aes = F) + geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) +
+  scale_x_continuous("GINI coefficient of inequality (residuals)", breaks = c(-15, -10, -5, 0, 5, 10, 15)) +
+  scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
+  labs(caption = "Partial multiple linear regression plot") + 
+  ggtitle("Economic Inequality vs. Economic Ideology-Racial Resentment Association") +
+  theme(title = element_text(size = 10))
 
-girafe(code = print(gini_plot))
+girafe(code = print(gini_plot), width_svg = 10)
 
 eth_plot <- ggplot(aes(x = resid(glm(`Ethnic Fractionalization Index` ~ GINI + `Cultural Diversity Index` + ever_communist)), 
                         y = resid(glm(Coefficients ~ GINI + `Cultural Diversity Index` + ever_communist)), 
                         color = Country), data = wvs_narm) + 
-  geom_point_interactive(aes(tooltip = Country_survey_year)) +
   geom_smooth(method = "glm", 
               aes(x = resid(glm(`Ethnic Fractionalization Index` ~ GINI + `Cultural Diversity Index` + ever_communist)), 
                   y = resid(glm(Coefficients ~ GINI + `Cultural Diversity Index` + ever_communist))), 
-              inherit.aes = F)
+              inherit.aes = F) + geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) +
+  scale_x_continuous("Ethnic fractionalization index (residuals)", breaks = c(-.25, -.2, -.15, -.1, -.05, 0, .05, .1, .15, .2, .25)) +
+  scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
+  labs(caption = "Partial multiple linear regression plot") + 
+  ggtitle("Ethnic Diversity vs. Economic Ideology-Racial Resentment Association") +
+  theme(title = element_text(size = 10))
 
-girafe(code = print(eth_plot))
+girafe(code = print(eth_plot), width_svg = 10)
 
 cult_plot <- ggplot(aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethnic Fractionalization Index` + ever_communist)), 
                        y = resid(glm(Coefficients ~ GINI + `Ethnic Fractionalization Index` + ever_communist)), 
@@ -351,7 +369,11 @@ cult_plot <- ggplot(aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethni
   geom_smooth(method = "glm", 
               aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethnic Fractionalization Index` + ever_communist)), 
                   y = resid(glm(Coefficients ~ GINI + `Ethnic Fractionalization Index` + ever_communist))), 
-              inherit.aes = F)
+              inherit.aes = F) + geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) +
+  scale_x_continuous("Cultural diversity index (residuals)", breaks = c(-.15, -.1, -.05, 0, .05, .1, .15)) +
+  scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
+  labs(caption = "Partial multiple linear regression plot") + 
+  ggtitle("Cultural Diversity vs. Economic Ideology-Racial Resentment Association") +
+  theme(title = element_text(size = 10)) + guides(color = F)
 
-girafe(code = print(cult_plot))
-
+girafe(code = print(cult_plot), width_svg = 10)
