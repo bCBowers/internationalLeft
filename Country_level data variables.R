@@ -32,8 +32,6 @@ eth_c <- wiki_eth %>%
 eth_c <- eth_c[[1]]
 eth_c <- eth_c[, -1]
 
-".table-chart > table:nth-child(1)"
-
 # Foreign born pop
 
 OECD_MIGR <- read.csv("foreign_pop.csv", na.strings = c("", "NA", "..", " .."))
@@ -81,8 +79,8 @@ f_com <- read.csv("countries.csv")
 
 # Get dataset w country & year 
 
-wvs <- WVS %>% add_column(Country = substr(as.character(wvs$Country_survey_year), 1, 
-                                        nchar(as.character(wvs$Country_survey_year))-5))
+wvs <- WVS %>% add_column(Country = substr(as.character(WVS$Country_survey_year), 1, 
+                                        nchar(as.character(WVS$Country_survey_year))-5))
 
 
 wvs <- wvs %>% add_column(Year = substr(as.character(wvs$Country_survey_year), 
@@ -263,6 +261,9 @@ glm(Coefficients ~ enep_c, data = wvs_full) %>%
 glm(Coefficients ~ Immigrants, data = wvs_full) %>% 
   summary()
 
+glm(Coefficients ~ GINI, data = wvs_full) %>% 
+  summary()
+
 glm(Coefficients ~ GDP_pc, data = wvs_full) %>% 
   summary()
 
@@ -284,32 +285,9 @@ glm(Coefficients ~ ever_communist, data = wvs_full) %>%
 ## Model building
 
 library(MASS)
-library(mice)
 
 dplyr::select(wvs_full, Coefficients, enep_c:ever_communist) %>% 
   filter(!is.na(Coefficients)) -> reg_vars
-
-# Using imputation
-
-imp_regvars <- mice(reg_vars)
-
-imp_vars <- complete(imp_regvars, 1)
-
-glm(Coefficients ~ ., data = imp_vars) %>% 
-  stepAIC(direction = "both") -> fit_imp
-
-summary(fit_imp)
-extractAIC(fit_imp)
-
-glm(Coefficients ~ ., data = imp_vars) %>% 
-  stepAIC(direction = "both", scope = 
-            list(lower = ~ Immigrants)) -> fit_imp_im
-
-summary(fit_imp_im)
-extractAIC(fit_imp_im)
-
-
-# Omiting NAs
 
 vars_narm <- na.omit(reg_vars)
 
@@ -319,10 +297,66 @@ glm(Coefficients ~ ., data = vars_narm) %>%
 summary(fit_narm)
 extractAIC(fit_narm)
 
-glm(Coefficients ~ ., data = vars_narm) %>% 
-  stepAIC(direction = "both", scope = 
-            list(lower = ~ Immigrants)) -> fit_narm_im
+#### Visualization ####
 
-summary(fit_narm_im)
-extractAIC(fit_narm_im)
+library(ggiraph)
+library(ggrepel)
+
+imm_plot <- ggplot(aes(x = Immigrants, y = Coefficients, color = Country), data = wvs_full) + 
+  geom_smooth(method = "glm", aes(x = Immigrants, y = Coefficients), inherit.aes = F) + 
+  geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) + 
+  geom_label_repel(data = filter(wvs_full, Country == "United States"), 
+                  aes(x = Immigrants, y = Coefficients, label = Country_survey_year), 
+                  segment.color = "black", box.padding = unit(.35, "lines"), point.padding = unit(.5, "lines"), 
+                  arrow = arrow(length = unit(.3, "lines"))) +
+  scale_x_continuous("Foreign born population (% of total)", breaks = c(0, 5, 10, 15, 20, 25, 30, 35, 40)) +
+  scale_y_continuous("Economic ideology-racial resentment association", breaks = c(-3, -2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5, 3)) +
+  guides(color = F) + coord_cartesian(xlim = c(0, 36), ylim = c(-2.5, 2.5)) + 
+  labs(caption = "Linear regression plot") + 
+  ggtitle("Foreign Born Population vs. Economic Ideology-Racial Resentment Association") +
+  theme(title = element_text(size = 9))
+
+girafe(code = print(imm_plot))
+
+
+geom_label(data = filter(wvs_full, Country == "United States"), 
+           aes(x = Immigrants, y = Coefficients, label = Country_survey_year), 
+           nudge_y = .17, size = 2.75)
+
+# Partial regression plots
+
+wvs_narm <- na.omit(wvs_full)
+
+gini_plot <- ggplot(aes(x = resid(glm(GINI ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist)), 
+                        y = resid(glm(Coefficients ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist)), 
+                        color = Country), data = wvs_narm) + 
+  geom_point_interactive(aes(tooltip = Country_survey_year)) +
+  geom_smooth(method = "glm", 
+              aes(x = resid(glm(GINI ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist)), 
+                  y = resid(glm(Coefficients ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist))), 
+              inherit.aes = F)
+
+girafe(code = print(gini_plot))
+
+eth_plot <- ggplot(aes(x = resid(glm(`Ethnic Fractionalization Index` ~ GINI + `Cultural Diversity Index` + ever_communist)), 
+                        y = resid(glm(Coefficients ~ GINI + `Cultural Diversity Index` + ever_communist)), 
+                        color = Country), data = wvs_narm) + 
+  geom_point_interactive(aes(tooltip = Country_survey_year)) +
+  geom_smooth(method = "glm", 
+              aes(x = resid(glm(`Ethnic Fractionalization Index` ~ GINI + `Cultural Diversity Index` + ever_communist)), 
+                  y = resid(glm(Coefficients ~ GINI + `Cultural Diversity Index` + ever_communist))), 
+              inherit.aes = F)
+
+girafe(code = print(eth_plot))
+
+cult_plot <- ggplot(aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethnic Fractionalization Index` + ever_communist)), 
+                       y = resid(glm(Coefficients ~ GINI + `Ethnic Fractionalization Index` + ever_communist)), 
+                       color = Country), data = wvs_narm) + 
+  geom_point_interactive(aes(tooltip = Country_survey_year)) +
+  geom_smooth(method = "glm", 
+              aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethnic Fractionalization Index` + ever_communist)), 
+                  y = resid(glm(Coefficients ~ GINI + `Ethnic Fractionalization Index` + ever_communist))), 
+              inherit.aes = F)
+
+girafe(code = print(cult_plot))
 
