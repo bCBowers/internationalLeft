@@ -308,7 +308,7 @@ imm_plot <- ggplot(aes(x = Immigrants, y = Coefficients, color = Country), data 
   geom_label_repel(data = filter(wvs_full, Country == "United States"), 
                   aes(x = Immigrants, y = Coefficients, label = Country_survey_year), 
                   segment.color = "black", box.padding = unit(.35, "lines"), point.padding = unit(.5, "lines"), 
-                  arrow = arrow(length = unit(.3, "lines"))) +
+                  arrow = arrow(length = unit(.3, "lines")), size = 2.5) +
   scale_x_continuous("Foreign born population (% of total)", breaks = c(0, 5, 10, 15, 20, 25, 30, 35, 40)) +
   scale_y_continuous("Economic ideology-racial resentment association", breaks = c(-3, -2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5, 3)) +
   guides(color = F) + coord_cartesian(xlim = c(0, 36), ylim = c(-2.5, 2.5)) + 
@@ -317,11 +317,6 @@ imm_plot <- ggplot(aes(x = Immigrants, y = Coefficients, color = Country), data 
   theme(title = element_text(size = 9))
 
 girafe(code = print(imm_plot))
-
-
-geom_label(data = filter(wvs_full, Country == "United States"), 
-           aes(x = Immigrants, y = Coefficients, label = Country_survey_year), 
-           nudge_y = .17, size = 2.75)
 
 # Partial regression plots
 
