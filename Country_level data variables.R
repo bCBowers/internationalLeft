@@ -24,14 +24,6 @@ eth_c <- wiki_eth %>%
 eth_c <- eth_c[[1]]
 eth_c <- eth_c[, -1]
 
-wiki_eth <- read_html("https://en.wikipedia.org/wiki/List_of_countries_ranked_by_ethnic_and_cultural_diversity_level")
-
-eth_c <- wiki_eth %>% 
-  html_nodes("table.wikitable:nth-child(11)") %>%
-  html_table(header = TRUE)
-eth_c <- eth_c[[1]]
-eth_c <- eth_c[, -1]
-
 # Foreign born pop
 
 OECD_MIGR <- read.csv("foreign_pop.csv", na.strings = c("", "NA", "..", " .."))
@@ -188,13 +180,15 @@ gdp <- gdp %>% mutate(Year = as.numeric(Year))
 
 ## Clean gini dataset
 
-gini <- select(GINI, Country.Name, X1990:X2017)
+gini <- dplyr::select(GINI, Country.Name, X1990:X2017)
 names(gini)[2:29] <- substr(names(gini)[2:29], 2, 5)
 names(gini)[1] <- "Country"
 
 gini <- gather(gini, "Year", "GINI", -Country)
 
 gini <- gini %>% mutate(Year = as.numeric(Year)) 
+
+gini <- gini %>% mutate(GINI = GINI/100)
 
 ## Clean edu dataset
 
@@ -297,6 +291,14 @@ glm(Coefficients ~ ., data = vars_narm) %>%
 summary(fit_narm)
 extractAIC(fit_narm)
 
+# US equation
+
+2.2812-6.4860*.405+3.3379*.491-2.5452*.271
+.98
+
+2.2812-6.4860*.404+3.3379*.491-2.5452*.271
+1.4
+
 #### Visualization ####
 
 library(ggiraph)
@@ -314,19 +316,9 @@ imm_plot <- ggplot(aes(x = Immigrants, y = Coefficients, color = Country), data 
   guides(color = F) + coord_cartesian(xlim = c(0, 36), ylim = c(-2.5, 2.5)) + 
   labs(caption = "Linear regression plot") + 
   ggtitle("Foreign Born Population vs. Economic Ideology-Racial Resentment Association") +
-  theme(title = element_text(size = 9))
+  theme(title = element_text(size = 12))
 
 girafe(code = print(imm_plot), width_svg = 10)
-
-gdp_plot <- ggplot(aes(x = GDP_pc, y = Coefficients, color = Country), data = wvs_full) + 
-  geom_smooth(method = "glm", aes(x = GDP_pc, y = Coefficients), inherit.aes = F) + 
-  geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) + 
-  geom_label_repel(data = filter(wvs_full, Country == "United States"), 
-                   aes(x = GDP_pc, y = Coefficients, label = Country_survey_year), 
-                   segment.color = "black", box.padding = unit(.35, "lines"), point.padding = unit(.5, "lines"), 
-                   arrow = arrow(length = unit(.3, "lines")), size = 2.5)
-
-girafe(code = print(gdp_plot), width_svg = 10)
 
 # Partial regression plots
 
@@ -338,12 +330,12 @@ gini_plot <- ggplot(aes(x = resid(glm(GINI ~ `Ethnic Fractionalization Index` + 
   geom_smooth(method = "glm", 
               aes(x = resid(glm(GINI ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist)), 
                   y = resid(glm(Coefficients ~ `Ethnic Fractionalization Index` + `Cultural Diversity Index` + ever_communist))), 
-              inherit.aes = F) + geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) +
-  scale_x_continuous("GINI coefficient of inequality (residuals)", breaks = c(-15, -10, -5, 0, 5, 10, 15)) +
+              inherit.aes = F) + geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) + 
+  scale_x_continuous("GINI coefficient of inequality (residuals)", breaks = c(-.14, -.07, 0, .07, .14)) +
   scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
   labs(caption = "Partial multiple linear regression plot") + 
   ggtitle("Economic Inequality vs. Economic Ideology-Racial Resentment Association") +
-  theme(title = element_text(size = 10))
+  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.13, .13))
 
 girafe(code = print(gini_plot), width_svg = 10)
 
@@ -358,7 +350,7 @@ eth_plot <- ggplot(aes(x = resid(glm(`Ethnic Fractionalization Index` ~ GINI + `
   scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
   labs(caption = "Partial multiple linear regression plot") + 
   ggtitle("Ethnic Diversity vs. Economic Ideology-Racial Resentment Association") +
-  theme(title = element_text(size = 10))
+  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.2325, .2325))
 
 girafe(code = print(eth_plot), width_svg = 10)
 
@@ -370,10 +362,10 @@ cult_plot <- ggplot(aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethni
               aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethnic Fractionalization Index` + ever_communist)), 
                   y = resid(glm(Coefficients ~ GINI + `Ethnic Fractionalization Index` + ever_communist))), 
               inherit.aes = F) + geom_point_interactive(aes(tooltip = Country_survey_year), show.legend = F) +
-  scale_x_continuous("Cultural diversity index (residuals)", breaks = c(-.15, -.1, -.05, 0, .05, .1, .15)) +
+  scale_x_continuous("Cultural diversity index (residuals)", breaks = c(-.18, -.12, -.06, 0, .06, .12, .18)) +
   scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
   labs(caption = "Partial multiple linear regression plot") + 
   ggtitle("Cultural Diversity vs. Economic Ideology-Racial Resentment Association") +
-  theme(title = element_text(size = 10)) + guides(color = F)
+  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.168, .168)) + guides(color = F)
 
 girafe(code = print(cult_plot), width_svg = 10)
