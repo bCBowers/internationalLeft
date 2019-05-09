@@ -246,34 +246,34 @@ wvs_full <- wvs_full %>% mutate(`Cultural Diversity Index` =
 
 #### Model the coefficients ####
 
-glm(Coefficients ~ enep, data = wvs_full) %>% 
+lm(Coefficients ~ enep, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ enep_c, data = wvs_full) %>% 
+lm(Coefficients ~ enep_c, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ Immigrants, data = wvs_full) %>% 
+lm(Coefficients ~ Immigrants, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ GINI, data = wvs_full) %>% 
+lm(Coefficients ~ GINI, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ GDP_pc, data = wvs_full) %>% 
+lm(Coefficients ~ GDP_pc, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ `Ethnic Fractionalization Index`, data = wvs_full) %>% 
+lm(Coefficients ~ `Ethnic Fractionalization Index`, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ `Cultural Diversity Index`, data = wvs_full) %>% 
+lm(Coefficients ~ `Cultural Diversity Index`, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ Education, data = wvs_full) %>% 
+lm(Coefficients ~ Education, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ ever_fascist, data = wvs_full) %>% 
+lm(Coefficients ~ ever_fascist, data = wvs_full) %>% 
   summary()
 
-glm(Coefficients ~ ever_communist, data = wvs_full) %>% 
+lm(Coefficients ~ ever_communist, data = wvs_full) %>% 
   summary()
 
 ## Model building
@@ -285,7 +285,7 @@ dplyr::select(wvs_full, Coefficients, enep_c:ever_communist) %>%
 
 vars_narm <- na.omit(reg_vars)
 
-glm(Coefficients ~ ., data = vars_narm) %>% 
+lm(Coefficients ~ ., data = vars_narm) %>% 
   stepAIC(direction = "both") -> fit_narm
 
 summary(fit_narm)
@@ -335,7 +335,13 @@ gini_plot <- ggplot(aes(x = resid(glm(GINI ~ `Ethnic Fractionalization Index` + 
   scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
   labs(caption = "Partial multiple linear regression plot") + 
   ggtitle("Economic Inequality vs. Economic Ideology-Racial Resentment Association") +
-  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.13, .13))
+  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.13, .13)) + 
+  annotate("label", label = "United States (2006)", x = .015, y = .42, size = 2.8, color = "red") +
+  annotate("segment", x = .015, y = .295, xend = 0.028958659, yend = 0.184436352, size = 0.5, 
+           arrow = arrow(length = unit(.2, "cm")))  + 
+  annotate("label", label = "United States (2011)", x = .048, y = 1.05, size = 2.8, color = "red") +
+  annotate("segment", x = .048, y = .925, xend = 0.027958659, yend = 0.609561928, size = 0.5, 
+           arrow = arrow(length = unit(.2, "cm")))
 
 girafe(code = print(gini_plot), width_svg = 10)
 
@@ -350,7 +356,13 @@ eth_plot <- ggplot(aes(x = resid(glm(`Ethnic Fractionalization Index` ~ GINI + `
   scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
   labs(caption = "Partial multiple linear regression plot") + 
   ggtitle("Ethnic Diversity vs. Economic Ideology-Racial Resentment Association") +
-  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.2325, .2325))
+  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.2325, .2325)) + 
+  annotate("label", label = "United States (2006)", x = .07, y = 1.1, size = 2.8, color = "red") +
+  annotate("segment", x = .07, y = .975, xend = 0.116305718, yend = 0.76047741, size = 0.5, 
+           arrow = arrow(length = unit(.2, "cm")))  + 
+  annotate("label", label = "United States (2011)", x = .07, y = 1.5, size = 2.8, color = "red") +
+  annotate("segment", x = .07, y = 1.375, xend = 0.116752803, yend = 1.18060926, size = 0.5, 
+           arrow = arrow(length = unit(.2, "cm")))
 
 girafe(code = print(eth_plot), width_svg = 10)
 
@@ -366,6 +378,12 @@ cult_plot <- ggplot(aes(x = resid(glm(`Cultural Diversity Index` ~ GINI + `Ethni
   scale_y_continuous("Economic-racial ideology association (residuals)", breaks = c(-2.5, -2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5)) + 
   labs(caption = "Partial multiple linear regression plot") + 
   ggtitle("Cultural Diversity vs. Economic Ideology-Racial Resentment Association") +
-  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.168, .168)) + guides(color = F)
+  theme(title = element_text(size = 12)) + coord_cartesian(ylim = c(-2.5, 2.5), xlim = c(-.168, .168)) + guides(color = F) + 
+  annotate("label", label = "United States (2006)", x = -.04, y = .9, size = 2.8, color = "red") +
+  annotate("segment", x = -.04, y = .775, xend = -0.081163106, yend = 0.578838971, size = 0.5, 
+           arrow = arrow(length = unit(.2, "cm")))  + 
+  annotate("label", label = "United States (2011)", x = -.04, y = 1.4, size = 2.8, color = "red") +
+  annotate("segment", x = -.04, y = 1.275, xend = -0.081252982, yend = 0.997707262, size = 0.5, 
+           arrow = arrow(length = unit(.2, "cm")))
 
 girafe(code = print(cult_plot), width_svg = 10)
