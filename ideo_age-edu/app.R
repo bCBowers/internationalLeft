@@ -28,6 +28,8 @@ W_EVS <- W_EVS %>% mutate(ideo_flip = 11 - self_ideo)
 
 cw_list <- W_EVS %>% dlply('country_wave')
 
+form_c <- read.csv("countries.csv")
+
 ## Create coefficient matrices
 
 lapply(cw_list, function(x) {
@@ -51,6 +53,8 @@ left_join(mutate(ideo_edu_adj, country_wave = factor(country_wave, levels = comb
 
 ideo_edu_adj %>% mutate(S020 = as.Date(ISOdate(S020, 1, 1))) %>% 
   mutate(country = droplevels(country)) -> ideo_edu_adj
+
+ideo_edu_adj <- left_join(ideo_edu_adj, form_c, by = c("country" = "Country"))
 
 ### UI
 
