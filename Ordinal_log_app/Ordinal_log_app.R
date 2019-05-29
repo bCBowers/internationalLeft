@@ -43,7 +43,7 @@ lapply(country_list, function(x) {
 
 # Define UI
 
-ui_2 <- fluidPage(
+ui <- fluidPage(
   titlePanel("Economic Ideology and Racial Resentment"),
   sidebarLayout(position = "right", 
                 sidebarPanel(
@@ -54,7 +54,7 @@ ui_2 <- fluidPage(
 
 # Define server
 
-server_2 <- function(input, output) {
+server <- function(input, output) {
   
   filtered <- reactive({
     W_EVS_probs %>% filter(country == input$country)
@@ -73,4 +73,4 @@ server_2 <- function(input, output) {
 }
 
 # Run the application 
-shinyApp(ui = ui_2, server = server_2)
+shinyApp(ui = ui, server = server)

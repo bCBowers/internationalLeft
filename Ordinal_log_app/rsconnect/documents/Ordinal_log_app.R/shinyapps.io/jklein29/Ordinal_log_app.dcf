@@ -5,8 +5,8 @@ account: jklein29
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 841136
-bundleId: 1988402
+bundleId: 2116216
 url: https://jklein29.shinyapps.io/Ordinal_log_app/
-when: 1554444536.07672
+when: 1559147260.36958
 asMultiple: FALSE
 asStatic: FALSE
