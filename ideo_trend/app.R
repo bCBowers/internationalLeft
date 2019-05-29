@@ -1,5 +1,6 @@
 # Load packages & data
 
+library(crunchy)
 library(shiny)
 library(ggplot2)
 library(tidyverse)
@@ -51,7 +52,7 @@ rac_ec_adj %>% mutate(S020 = as.Date(ISOdate(S020, 1, 1))) %>%
 
 # UI
 
-ui <- fluidPage(titlePanel("Association between Economic Ideology and Racial Resentment Level Over Time"), 
+ui <- fluidPage(crunchyBody(titlePanel("Association between Economic Ideology and Racial Resentment Level Over Time"), 
                 sidebarLayout(position = "right", 
                               sidebarPanel(
                                 checkboxGroupInput("checkGroup_adj", label = "Country", 
@@ -59,11 +60,11 @@ ui <- fluidPage(titlePanel("Association between Economic Ideology and Racial Res
                                                    selected = c("Australia", "Germany", "Great Britain", 
                                                                 "Poland", "South Korea", "United States")), 
                                 width = 2),
-                              mainPanel(ggiraphOutput("plot_adj"), width = 10)))
+                              mainPanel(ggiraphOutput("plot_adj"), width = 10))))
 
 # Server
 
-server <- function(input, output) {
+server <- crunchyServer(function(input, output, session) {
   
   plot_data_adj <- reactive({
     dat_adj <- filter(rac_ec_adj)
@@ -97,7 +98,8 @@ server <- function(input, output) {
     girafe(code = print(gg_plot_adj), width_svg = 15)
   })
   
-}
+})
 
 # Run the application 
+
 shinyApp(ui = ui, server = server)
