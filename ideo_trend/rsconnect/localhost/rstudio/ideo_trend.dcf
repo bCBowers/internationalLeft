@@ -1,0 +1,12 @@
+name: ideo_trend
+title: ideo_trend
+username: rstudio
+account: rstudio
+server: localhost
+hostUrl: http://localhost:5000/rsconnect/__api__
+appId: 8
+bundleId: 8
+url: http://localhost:5000/rsconnect/content/8/
+when: 1559077167.24444
+asMultiple: FALSE
+asStatic: FALSE

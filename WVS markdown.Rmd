@@ -1,8 +1,10 @@
 ---
 title: "WVS"
 author: "Jordan Klein"
-date: "9/12/2018"
-output: html_document
+date: "3/12/2019"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r code, include=FALSE}
@@ -15,65 +17,117 @@ library(rvest)
 library(plyr)
 library(broom)
 library(knitr)
+library(stargazer)
 
 # Import data
 
-WVS <- read.csv('WV6_Data_r+e_vars.csv')
+Raw <- read.csv(unz("WVS+EVS_combined.csv.zip", "WVS+EVS_combined.csv"))
+
+W_EVS <- Raw
 
 # Clean data
 
-WVS <- WVS %>% filter(V96 > 0 & V97 > 0 & V98 > 0 & V99 > 0 & V37 > 0 & V39 > 0 & V46 > 0) %>%
-  select(-X)
+W_EVS <- W_EVS %>%  mutate(A124_02 = replace(A124_02, A124_02 == 0, 2), 
+                           A124_06 = replace(A124_06, A124_06 == 0, 2), 
+                           C002 = replace(C002, C002 == 2, 4)) %>% 
+  mutate(C002 = replace(C002, C002 == 3, 2)) %>% 
+  mutate(C002 = replace(C002, C002 == 4, 3))
 
-WVS <- WVS %>% add_column(ID = c(1:dim(WVS)[1]), .before = 'V2')
+W_EVS[, c("E035", "E036", "E037", "E039", "A124_02", "A124_06", "C002", "X025", "F028")] <- 
+  select(W_EVS, E035:E037, E039, A124_02, A124_06, C002, X025, F028) %>% 
+  sapply(function(x) {
+    replace(x, x < 1, NA)
+    })
 
-# Import country codes 
+# Create indices
 
+W_EVS <- W_EVS %>% mutate(ec_ideo = (((E035 + 8)/9) * ((abs(E036 - 11) + 8)/9) * 
+                                   ((abs(E037 - 11) + 8)/9) * ((abs(E039 - 11) + 8)/9))^(1/4) - 1) %>%
+  mutate(rac_ideo = ((abs(A124_02 - 2) + 1) * (abs(A124_06 - 2) + 1) * 
+                       ((abs(C002 - 4) + 1)/2)^2)^(1/4) - 1)
 
-wvs_git <- read_html("https://github.com/xmarquez/WorldValuesSurvey/blob/master/Country%20codes%20for%20WVS%20wave%206.csv")
-
-countryCodes <- wvs_git %>% 
-  html_nodes(".js-csv-data") %>%
-  html_table(header = TRUE)
-countryCodes <- countryCodes[[1]]
-
-countryCodes <- countryCodes %>% select(-c(1))
-
-# Replace country codes with countries
-
-WVS <- WVS %>% left_join(countryCodes)
-
-WVS <- WVS %>% select(-V2)
-
-# Create indices of economic ideology & racial resentment
-
-WVS <- WVS %>% mutate(ec_ideo = (((V96 + 8)/9) * ((abs(V97 - 11) + 8)/9) * 
-                                   ((V98 + 8)/9) * ((abs(V99 - 11) + 8)/9))^(1/4) - 1) %>%
-  mutate(rac_ideo = ((abs(V37 - 2) + 1) * (abs(V39 - 2) + 1) * 
-                       ((abs(V46 - 4) + 1)/2)^2)^(1/4) - 1)
-
-# Import OECD countries
-
-wiki <- read_html("https://en.wikipedia.org/wiki/OECD")
-
-OECD <- wiki %>% 
-  html_nodes("table.wikitable:nth-child(70)") %>%
-  html_table(header = TRUE)
-OECD <- OECD[[1]]
-
-# Filter OECD countries
-
-WVS_OECD <- WVS %>% filter(country %in% OECD$Country)
+W_EVS <- W_EVS %>% mutate(edu = X025)
+W_EVS <- W_EVS %>% mutate(relig = F028)
 
 # Split into list by country
 
-country_list <- WVS_OECD %>% dlply('country')
+country_list <- W_EVS %>% dlply('country')
+
+# Create reference category
+
+sapply(country_list, function(x) {
+  model <- lm(rac_ideo ~ ec_ideo, data = x, weights = S017)
+  out <- tidy(model)
+  kable(out)
+  return(model$coefficients[2])
+}) -> coeffs
+median(coeffs)
+
+W_EVS <- W_EVS %>% within(country <- relevel(country, ref = "New Zealand"))
+
+## Modeling
+
+# Individual country
+
+lapply(country_list, function(x) {
+  model <- lm(rac_ideo ~ ec_ideo, data = x, weights = S017)
+  out <- tidy(model)
+  kable(out)
+})
+
+lapply(country_list, function(x) {
+  model <- lm(rac_ideo ~ ec_ideo + edu, data = x, weights = S017)
+  out <- tidy(model)
+  kable(out)
+})
+
+lapply(country_list, function(x) {
+  model <- lm(rac_ideo ~ ec_ideo + relig, data = x, weights = S017)
+  out <- tidy(model)
+  kable(out)
+})
+
+lapply(country_list, function(x) {
+  model <- lm(rac_ideo ~ ec_ideo + edu + relig, data = x, weights = S017)
+  out <- tidy(model)
+  kable(out)
+})
+
+# Full model with dummy variables
+
+full_model <- lm(rac_ideo ~ ec_ideo*country, data = filter(W_EVS, !is.na(edu) & !is.na(relig)), weights = S017)
+
+summary(full_model)
+
+
+full_model_edu <- lm(rac_ideo ~ ec_ideo*country + edu*country, data = filter(W_EVS, !is.na(edu) & !is.na(relig)), 
+                     weights = S017)
+
+summary(full_model_edu) 
+
+anova(full_model, full_model_edu)
+
+
+full_model_rel <- lm(rac_ideo ~ ec_ideo*country + relig*country, data = filter(W_EVS, !is.na(edu) & !is.na(relig)), 
+                     weights = S017)
+
+summary(full_model_rel) 
+
+anova(full_model, full_model_rel)
+
+multi_model <- lm(rac_ideo ~ edu*country + relig*country + ec_ideo*country, 
+                  data = filter(W_EVS, !is.na(edu) & !is.na(relig)), weights = S017)
+
+summary(multi_model)
+
+anova(full_model_edu, multi_model)
+anova(full_model_rel, multi_model)
 ```
 
 ``` {r models, echo=FALSE}
 # Generate models
 lapply(country_list, function(x) {
-  model <- lm(rac_ideo ~ ec_ideo, data = x, weights = V258)
+  model <- lm(rac_ideo ~ ec_ideo + edu + relig, data = x, weights = S017)
   out <- tidy(model)
   kable(out)
 })

@@ -1,0 +1,12 @@
+name: ideo_age-edu
+title: ideo_age-edu
+username:
+account: jklein29
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 946631
+bundleId: 2105274
+url: https://jklein29.shinyapps.io/ideo_age-edu/
+when: 1558657705.16033
+asMultiple: FALSE
+asStatic: FALSE

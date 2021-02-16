@@ -1,0 +1,12 @@
+name: econ_age
+title: econ_age
+username:
+account: jklein29
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 870291
+bundleId: 2019747
+url: https://jklein29.shinyapps.io/econ_age/
+when: 1555539452.67354
+asMultiple: FALSE
+asStatic: FALSE

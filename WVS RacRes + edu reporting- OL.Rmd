@@ -1,0 +1,58 @@
+---
+title: "Relationship between Education and Racial Resentment"
+author: "Jordan Klein"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+*A cross-national comparison*
+
+*Higher coefficients indicate a stronger relationship between higher levels of education and higher levels of racial resentment (and between lower levels of education and lower levels of racial resentment)*
+
+*Method: Ordinal logistic regression*
+
+```{r code, include=FALSE}
+### Import data
+
+library(shiny)
+library(ggplot2)
+library(tidyverse)
+library(ggrepel)
+library(survey)
+library(rvest)
+library(plyr)
+library(broom)
+library(knitr)
+library(RCurl)
+library(stargazer)
+library(MASS)
+
+W_EVS <- read.csv("W_EVS_clean.csv")
+
+W_EVS <- W_EVS %>% mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
+
+# Split into list by country-wave
+
+cw_list <- W_EVS %>% dlply('country_wave')
+
+## Modeling
+
+lapply(cw_list, function(x) {
+  filter(x, !is.na(RacRes) & !is.na(edu))
+}) %>% 
+  .[sapply(., function(x) {
+    dim(x)[1] > 0
+  })] %>% 
+  lapply(function(x) {
+  model <- polr(RacRes ~ edu, data = x, weights = S017, Hess = T)
+  return(data.frame(Coefficients = model$coefficients[1]))
+}) %>% 
+  do.call(rbind.data.frame, .) -> coeff.tab
+
+POLR.tab <- coeff.tab[order(coeff.tab$Coefficients, decreasing = T), , drop = F]
+```
+
+```{r echo=FALSE, results='asis'}
+kable(POLR.tab)
+```

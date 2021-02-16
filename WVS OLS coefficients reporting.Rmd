@@ -1,0 +1,66 @@
+---
+title: "Relationship between Economic Ideology and Racial Resentment"
+author: "Jordan Klein"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+*A cross-national comparison, adjusted for educational attainment and relgious service attendance*
+
+*Higher coefficients indicate a stronger relationship between right-wing economic ideology and higher levels of racial resentment (and between left-wing economic ideology and lower levels of racial resentment)*
+
+<<<<<<< HEAD
+*Method: Multiple linear regression*
+
+=======
+>>>>>>> b4729e6ce0f727d5d044d82e62f10aa882ab219d
+```{r code, include=FALSE}
+### Import data
+
+library(shiny)
+library(ggplot2)
+library(tidyverse)
+library(ggrepel)
+library(survey)
+library(rvest)
+library(plyr)
+library(broom)
+library(knitr)
+library(RCurl)
+library(stargazer)
+
+url <- getURL("https://raw.githubusercontent.com/Jklein29/internationalLeft/master/WVS_viz_vars.csv")
+W_EVS <- read.csv(text = url)
+
+# Create racial resentment factor variable
+
+W_EVS <- W_EVS %>% mutate(RacRes = case_when(rac_ideo == 0 ~ "Very low", 
+                                             rac_ideo > 0 & rac_ideo <= .25 ~ "Low", 
+                                             rac_ideo > .25 & rac_ideo <= .5 ~ "Moderate", 
+                                             rac_ideo > .5 & rac_ideo <= .75 ~ "High", 
+                                             rac_ideo > .75 ~ "Very high")) %>% 
+  mutate(RacRes = factor(RacRes, levels = c("Very low", "Low", "Moderate", "High", "Very high")))
+
+W_EVS <- W_EVS %>% mutate(RacRes_n = case_when(RacRes == "Very low" ~ 0, 
+                                               RacRes == "Low" ~ .25, RacRes == "Moderate" ~ .5, 
+                                               RacRes == "High" ~ .75, RacRes == "Very high" ~ 1))
+
+# Split into list by country
+
+country_list <- W_EVS %>% dlply('country')
+
+## Modeling
+
+lapply(country_list, function(x) {
+  model <- lm(RacRes_n ~ ec_ideo + edu + relig, data = x, weights = S017)
+  return(data.frame(Coefficients = model$coefficients[2]))
+}) %>% 
+  do.call(rbind.data.frame, .) -> coeff.tab
+
+OLS.tab <- coeff.tab[order(coeff.tab$Coefficients, decreasing = T), , drop = F]
+```
+
+```{r echo=FALSE, results='asis'}
+kable(OLS.tab)
+```
